@@ -1,0 +1,433 @@
+---
+title: "Etude longitudinale srh ~ retraite ajustÃƒÂ© sur facteurs habituels"
+output:
+  html_document: default
+  html_notebook: default
+  pdf_document: default
+---
+
+```{r}
+library(tidyverse)
+```
+
+```{r}
+getwd()
+baseline = read.csv(file = "W:/Odélia/projet2/data/inclusion/Baseline20190215.csv", header = TRUE, row.names = NULL, sep = ';')
+suivi_6 = read.csv(file = "W:/Odélia/projet2/data/6_ans/suivi6.csv", header = TRUE, row.names = NULL, sep = ";")
+suivi_4 = read.csv(file = "W:/Odélia/projet2/data/4_ans/suivi4.csv", header = TRUE, row.names = NULL, sep = ";")
+```
+
+```{r}
+#help(merge)
+```
+
+
+"Variables de baselines à inclure"
+nepp3
+age0
+sexe
+seul
+adm12
+adm12a
+qm16 = tabac
+stress = score de stress pss4
+depress = score de dépression
+depbin = depressif oui non
+Qm73 = santé perçue
+csp
+adm11 = ne travaille plus depuis
+actpro
+educ
+Act22 = sport oui non
+epice = score de précarité
+adm16 = diff acces soins
+adm18 = situation pro precaire
+
+
+
+"Variables de suivi_6 à inclure"
+nepp3 (nepp3)
+age (age0+6)
+sexe (sexe)
+vit_seul (seul)
+retraite (adm12 adm12a)
+FUM(qm16)
+PSS4_score (stress)
+QD2A_score (depress)
+QD2A_dep (depbin)
+sante_percue (qm73)
+APS (act22)
+
+```{r}
+baseline_tmp = baseline[,c("nepp3","age0","sexe","seul","Adm12","Adm12a","depress","depbin","stress","Adm11","Qm16","csp","Qm73","actpro","educ","Act22","epice","Adm16","adm18")]
+```
+
+```{r}
+str(baseline_tmp)
+```
+```{r}
+baseline_tmp$nepp3 = as.character(baseline_tmp$nepp3)
+baseline_tmp$sexe = as.factor(baseline_tmp$sexe)
+baseline_tmp$seul = as.factor(baseline_tmp$seul)
+baseline_tmp$depress = as.factor(baseline_tmp$depress)
+baseline_tmp$depbin = as.factor(baseline_tmp$depbin)
+baseline_tmp$stress = as.factor(baseline_tmp$stress)
+baseline_tmp$Adm11 = as.factor(baseline_tmp$Adm11)
+baseline_tmp$Qm16 = as.factor(baseline_tmp$Qm16)
+baseline_tmp$csp = as.factor(baseline_tmp$csp)
+baseline_tmp$Qm73 = as.factor(baseline_tmp$Qm73)
+baseline_tmp$actpro = as.factor(baseline_tmp$actpro)
+baseline_tmp$educ = as.factor(baseline_tmp$educ)
+baseline_tmp$Act22 = as.factor(baseline_tmp$Act22)
+baseline_tmp$Adm16 = as.factor(baseline_tmp$Adm16)
+baseline_tmp$adm18 = as.factor(baseline_tmp$adm18)
+```
+
+```{r}
+str(baseline_tmp)
+```
+adm12	ETES-VOUS		
+6XXXXX = contrat emploi-solidarité, intérim, CDD
+X5XXXX = chômeur depuis + de 6 mois
+XX4XXX = chômeur depuis - de 6 mois
+XXX3XX = à la recherche d'un emploi
+XXXX2X = jeune en cours de formation
+XXXXX1 = étudiant			
+									
+									
+adm12a	ETES-VOUS 2EME PARTIE		
+JXXX = en formation professionnelle
+X9XX = au foyer
+XX8X = retraité(e)
+XXX7 = pré-retraité(e)			
+					
+actpro	Activité professionnelle	
+0	travaille (adm11=0)	
+1	ne travaille plus (adm11= 1, 2, 3 ou 4)					
+5	n'a jamais travaillé (adm11=5)	
+
+adm11	SANS ACTIVITE DEPUIS	
+      0	en activité				
+			1	moins d'un an					
+			2	1 an					
+			3	2 ans					
+			4	3 ans ou +					
+			5	jamais travaillé	
+			
+qm16	êtes-vous	
+      1	non fumeur		
+			2	fumeur actuel					
+			3	ancien fumeur					
+			4	en cours d'arrêt - 1 an					
+
+act22	FAITES VOUS EXERCIE OU PRATIQUEZ VOUS UN SPORT	
+      0	Non	
+			1	Oui		
+			
+adm16	ACCES AUX SOINS	
+      0	Non				
+			1	Oui					
+
+adm18	SITUATION PROF PRECAIRE	
+      0	Non				
+			1	Oui					
+
+stress	Score de stress (échelle PSS4)					
+
+```{r}
+colnames(baseline_tmp)
+```
+
+```{r}
+names(baseline_tmp)[names(baseline_tmp) == "nepp3"] <- "nepp3"
+names(baseline_tmp)[names(baseline_tmp) == "age0"] <- "age_bl"
+names(baseline_tmp)[names(baseline_tmp) == "sexe"] <- "sexe_bl"
+names(baseline_tmp)[names(baseline_tmp) == "seul"] <- "seul_bl"
+names(baseline_tmp)[names(baseline_tmp) == "depress"] <- "depress_bl"
+names(baseline_tmp)[names(baseline_tmp) == "depbin"] <- "depbin_bl"
+names(baseline_tmp)[names(baseline_tmp) == "stress"] <- "stress_bl"
+names(baseline_tmp)[names(baseline_tmp) == "Adm11"] <- "sans_actpro_depuis_bl"
+names(baseline_tmp)[names(baseline_tmp) == "Qm16"] <- "tabagisme_bl"
+names(baseline_tmp)[names(baseline_tmp) == "Qm73"] <- "srh_bl"
+names(baseline_tmp)[names(baseline_tmp) == "Act22"] <- "actSportive_bl"
+names(baseline_tmp)[names(baseline_tmp) == "Adm16"] <- "accesSoins_bl"
+names(baseline_tmp)[names(baseline_tmp) == "adm18"] <- "precariteTravail_bl"
+names(baseline_tmp)[names(baseline_tmp) == "Adm12"] <- "Adm12_bl"
+names(baseline_tmp)[names(baseline_tmp) == "Adm12a"] <- "Adm12a_bl"
+names(baseline_tmp)[names(baseline_tmp) == "csp"] <- "csp_bl"
+names(baseline_tmp)[names(baseline_tmp) == "actpro"] <- "actpro_bl"
+names(baseline_tmp)[names(baseline_tmp) == "educ"] <- "educ_bl"
+names(baseline_tmp)[names(baseline_tmp) == "epice"] <- "epice_bl"
+names(baseline_tmp)[names(baseline_tmp) == "srh"] <- "srh_bl"
+
+```
+
+```{r}
+colnames(baseline_tmp)
+```
+
+```{r}
+suivi_6_tmp = suivi_6[, c("nepp3","age","sexe","vit_seul","Retraite","FUM_4cl","PSS4_score","QD2A_score","QD2A_dep","sante_percue","APS")]
+```
+
+
+```{r}
+str(suivi_6_tmp)
+```
+
+
+```{r}
+suivi_6_tmp$nepp3 = as.character(suivi_6_tmp$nepp3)
+suivi_6_tmp$sexe = as.factor(suivi_6_tmp$sexe)
+suivi_6_tmp$vit_seul = as.factor(suivi_6_tmp$vit_seul)
+suivi_6_tmp$Retraite = as.factor(suivi_6_tmp$Retraite)
+suivi_6_tmp$FUM_4cl = as.factor(suivi_6_tmp$FUM_4cl)
+suivi_6_tmp$PSS4_score = as.factor(suivi_6_tmp$PSS4_score)
+suivi_6_tmp$QD2A_score = as.factor(suivi_6_tmp$QD2A_score)
+suivi_6_tmp$QD2A_dep = as.factor(suivi_6_tmp$QD2A_dep)
+suivi_6_tmp$sante_percue = as.factor(suivi_6_tmp$sante_percue)
+suivi_6_tmp$APS = as.factor(suivi_6_tmp$APS)
+```
+
+
+
+```{r}
+str(suivi_6_tmp)
+```
+
+Retraite		
+1=Oui
+0=Non
+question posée différemment que dans les autres Q	~Adm12 et Adm12a	
+
+vit_seul		=   seul 
+1=Oui
+0=Non
+(seul	0	Non					
+			1	Oui )				
+
+FUM_4cl	Statut tabagique	 eq = qm 16 a recoder !!!!
+1=fumeur actuel
+2=non fumeur
+3=en cours d'arrêt depuis <1 an
+4=ancien fumeur
+
+PSS4_score	Score de stress (échelle PSS4)	
+		
+QD2A_score	score QD2A 		0-13		depress	/	QD2A_score			
+
+
+```{r}
+colnames(suivi_6_tmp)
+```
+```{r}
+names(suivi_6_tmp)[names(suivi_6_tmp) == "nepp3"] <- "nepp3"
+names(suivi_6_tmp)[names(suivi_6_tmp) == "age"] <- "age_6"
+names(suivi_6_tmp)[names(suivi_6_tmp) == "sexe"] <- "sexe_6"
+names(suivi_6_tmp)[names(suivi_6_tmp) == "vit_seul"] <- "seul_6"
+names(suivi_6_tmp)[names(suivi_6_tmp) == "Retraite"] <- "Retraite_6"
+names(suivi_6_tmp)[names(suivi_6_tmp) == "PSSA_score"] <- "tabagisme_6"
+names(suivi_6_tmp)[names(suivi_6_tmp) == "QD2A_score"] <- "depress_6"
+names(suivi_6_tmp)[names(suivi_6_tmp) == "QD2A_dep"] <- "depbin_6"
+names(suivi_6_tmp)[names(suivi_6_tmp) == "sante_percue"] <- "srh_6"
+names(suivi_6_tmp)[names(suivi_6_tmp) == "APS"] <- "actSportive_6"
+names(suivi_6_tmp)[names(suivi_6_tmp) == "PSS4_score"] <- "PSS4_score_6"
+
+```
+
+
+```{r}
+colnames(suivi_6_tmp)
+```
+
+FUM_4cl	Statut tabagique	 eq = qm 16 a recoder !!!!
+    1=fumeur actuel
+    2=non fumeur
+    3=en cours d'arrêt depuis <1 an
+    4=ancien fumeur
+
+qm16	êtes-vous	
+      1	non fumeur		
+			2	fumeur actuel					
+			3	ancien fumeur					
+			4	en cours d'arrêt - 1 an	
+			
+```{r}
+levels(suivi_6_tmp$FUM_4cl)
+```
+
+
+fct_recode : nouvelle = ancienne, pkg tidyverse
+```{r}
+suivi_6_tmp$FUM_4cl =  fct_recode(suivi_6_tmp$FUM_4cl, "fum_actu" = "1", "non_fum" = "2","enCoursStop" = "3","AncienFum" = "4")
+```
+
+```{r}
+levels(suivi_6_tmp$FUM_4cl) 
+```
+
+```{r}
+suivi_6_tmp$FUM_4cl =  fct_recode(suivi_6_tmp$FUM_4cl,  "1" =  "non_fum",  "2" = "fum_actu", "3" = "AncienFum" ,  "4" = "enCoursStop")
+```
+
+```{r}
+levels(suivi_6_tmp$FUM_4cl)
+```
+Maintenant Fum_4cl = qm16
+
+
+# Comparaison de la santé perçue chez les retraités et non retraités de la baseline
+
+```{r}
+summary(baseline_tmp$Adm12a_bl)
+```
+
+```{r}
+retraites_bl = baseline_tmp[baseline_tmp$Adm12a_bl == 'NN8N',]
+print("retraités de la baseline")
+dim(retraites_bl)
+```
+
+```{r}
+summary(retraites_bl$age_bl)
+```
+```{r}
+length(which(retraites_bl$age_bl < 58))
+```
+
+```{r}
+nn_retraites_bl = subset(baseline_tmp, baseline_tmp$Adm12a_bl != 'NN8N')
+print("non retraités de la baseline")
+dim(nn_retraites_bl)
+```
+```{r}
+cat("nbr de non retraités n'ayant jamais travaillé:",length(which(nn_retraites_bl$actpro_bl == 5)))
+```
+
+
+```{r}
+ggplot(retraites_bl, aes(x=factor(retraites_bl$srh_bl)))+
+  geom_bar(stat="count", width=0.7, fill="steelblue")+
+  theme_minimal() + ggtitle("Repartition de la santé perçue chez les sujets retraités à l'inclusion")
+```
+
+
+```{r}
+ggplot(nn_retraites_bl, aes(x=factor(nn_retraites_bl$srh_bl)))+
+  geom_bar(stat="count", width=0.7, fill="steelblue")+
+  theme_minimal() + ggtitle("Repartition de la santé perçue chez les sujets non retraités à l'inclusion")
+```
+
+
+```{r}
+retraites_6 = suivi_6_tmp[suivi_6_tmp$Retraite_6 == 1,]
+dim(retraites_6)
+```
+
+On réunit dans un df ceux qui n'étaient pas à la retraite à l'inclusion et qui le sont à suivi6
+
+
+
+```{r}
+dfRet = merge(nn_retraites_bl, retraites_6, by = "nepp3")
+dim(dfRet)
+```
+
+y a t il dans dfRet des sujets qui travaillent 
+```{r}
+which(dfRet$actpro_bl == 0 & Retraite_bl == 1 )
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+```{r}
+data = merge(baseline_tmp, suivi_6_tmp, by = "nepp3")
+```
+
+
+
+
+```{r}
+#summary(data)
+```
+```{r}
+names(data)[names(data) == "FUM_4cl"] <- "tabagisme_6"
+```
+```{r}
+str(data)
+```
+
+
+On suprime les individus n'ayant jamais travaillé
+```{r}
+length(which(data$actpro_bl == 5))
+```
+```{r}
+length(which(is.na(data$actpro_bl)))
+```
+
+```{r}
+actpro5dt = subset(data, (data$actpro_bl == 5 ))
+```
+```{r}
+summary(actpro5dt)
+```
+```{r}
+prop.table(table(actpro5dt$sexe_bl ))*100
+```
+88 % des sujets n'ayant jamais travaillé sont des femmes.
+```{r}
+table(actpro5dt$Retraite_6)
+```
+34 sujets n'ayant jamais travaillé se decarent à la retraite dans le suivi à 6 ans.
+ Il est pertinent de retirer les sujets n'ayant jamais travaillé pour qu'ils n'influencent pas un eventuel changement entre de santé perçuer avant et aprés la retraite.
+
+
+```{r}
+data2 = subset(data, ((data$actpro_bl !=5) | is.na(data$actpro_bl)))
+```
+adm12a	ETES-VOUS 2EME PARTIE		
+JXXX = en formation professionnelle
+X9XX = au foyer
+XX8X = retraité(e)
+XXX7 = pré-retraité(e)
+
+
+
+
+## Exploration
+
+```{r}
+summary(baseline_tmp$srh_bl)
+```
+```{r}
+cumsum(summary(baseline_tmp$srh_bl))
+```
+```{r}
+length(which((baseline_tmp$srh_bl == 0)| (baseline_tmp$srh_bl == 1) | (baseline_tmp$srh_bl == 2) | (baseline_tmp$srh_bl == 3) |(baseline_tmp$srh_bl == 4)))
+```
+```{r}
+length(which(baseline_tmp$srh_bl == 5 | baseline_tmp$srh_bl == 6 | baseline_tmp$srh_bl == 7))
+```
+```{r}
+length(which(baseline_tmp$srh_bl == 8 | baseline_tmp$srh_bl == 9 | baseline_tmp$srh_bl == 10))
+
+```
+
+```{r}
+summary(suivi_6_tmp$srh_6)
+```
+
+```{r}
+cumsum(summary(suivi_6_tmp$srh_6))
+```

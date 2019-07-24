@@ -1,0 +1,525 @@
+---
+title: "R Notebook"
+output: html_notebook
+editor_options: 
+  chunk_output_type: inline
+---
+
+```{r}
+setwd(dir = "W:/Odélia/projet3")
+```
+
+```{r}
+getwd()
+baseline = read.csv(file = "W:/Odélia/projet2/data/inclusion/Baseline20190215.csv", header = TRUE, row.names = NULL, sep = ';')
+suivi_6 = read.csv(file = "W:/Odélia/projet2/data/6_ans/suivi6.csv", header = TRUE, row.names = NULL, sep = ";")
+suivi_4 = read.csv(file = "W:/Odélia/projet2/data/4_ans/suivi4.csv", header = TRUE, row.names = NULL, sep = ";")
+```
+
+# prÃ©liminaires
+
+```{r}
+baseline$Adm11 = as.factor(baseline$Adm11)
+baseline$Adm12 = as.factor(baseline$Adm12)
+baseline$Adm12a = as.factor(baseline$Adm12a)
+baseline$Adm10 = as.factor(baseline$Adm10)
+```
+
+```{r}
+baseline$csp = as.factor(baseline$csp)
+str(baseline$csp)
+```
+```{r}
+baseline$Qm73 = as.factor(baseline$Qm73)
+```
+
+
+```{r}
+for( j in 1:(dim(baseline)[1])){
+  if (baseline$sexe[j] == 0)
+    baseline$sexe[j] = "F"
+  else if (baseline$sexe[j] == 1)
+    baseline$sexe[j] = "H"
+}
+
+```
+```{r}
+table(baseline$sexe)
+```
+```{r}
+sum(is.na(baseline$Qm73))
+```
+
+```{r}
+baseline$Qm73_bin = 0
+for (k in 1:(dim(baseline)[1])){
+  if(is.na(baseline$Qm73[k]))
+    baseline$Qm73_bin[k] = NA
+  else if (baseline$Qm73[k] %in% c(0,1,2,3,4,5,6,7))
+    baseline$Qm73_bin[k] = 0
+  else
+    baseline$Qm73_bin[k] = 1
+}
+```
+
+```{r}
+baseline$Qm73_bin = as.factor(baseline$Qm73_bin)
+```
+
+
+
+# Activite dans baseline
+On crÃ©e une variable activite dans baseline qui rÃ©sume l'activité pro en 5 catégories : 
+  1. travaille
+  2. retraité
+  3. chomeur
+  4. inactif
+  5. à revoir
+ 
+On regarde toutes les variables qui traitent de la situation pro : Adm112, Adm12a, Adm10 et Adm11. 
+
+
+
+```{r}
+levels(baseline$Adm12a)
+levels(baseline$Adm11)
+levels(baseline$Adm12)
+levels(baseline$Adm10)
+```
+
+
+
+	adm11	SANS ACTIVITE DEPUIS	
+	    0	en activitÃ©			
+			1	moins d'un an					
+			2	1 an					
+			3	2 ans					
+			4	3 ans ou +					
+			5	jamais travaillÃ©					
+									
+	adm12	ETES-VOUS		
+    6XXXXX = contrat emploi-solidaritÃ©, intÃ©rim, CDD
+    X5XXXX = chÃ´meur depuis + de 6 mois
+    XX4XXX = chÃ´meur depuis - de 6 mois
+    XXX3XX = Ã la recherche d'un emploi
+    XXXX2X = jeune en cours de formation
+    XXXXX1 = Ã©tudiant		
+									
+	adm12a	ETES-VOUS 2EME PARTIE		
+    JXXX = en formation professionnelle
+    X9XX = au foyer
+    XX8X = retraitÃ©(e)
+    XXX7 = prÃ©-retraitÃ©(e)			
+									
+
+```{r}
+which(baseline$Adm12 == "")
+which(baseline$Adm12a == "")
+which(baseline$Adm11 == "")
+which(baseline$Adm10 == "")
+```
+```{r}
+baseline$Adm12[which(baseline$Adm12 == "")] = NA
+baseline$Adm12a[which(baseline$Adm12a == "")] = NA
+baseline$Adm11[which(baseline$Adm11 == "")] = NA
+baseline$Adm10[which(baseline$Adm10 == "")] = NA
+```
+```{r}
+which(baseline$Adm12 == "")
+which(baseline$Adm12a == "")
+which(baseline$Adm11 == "")
+which(baseline$Adm10 == "")
+```
+```{r}
+sum(is.na(baseline$Adm12))
+sum(is.na(baseline$Adm12a))
+sum(is.na(baseline$Adm10))
+sum(is.na(baseline$Adm11))
+```
+
+Pour créer la variable on fixe omme variables principales Adm12a et Adm11 puis on "ajuste" avec Adm12 et Adm10
+
+```{r}
+table(baseline$Adm12a, baseline$Adm11, useNA = "ifany")
+```
+```{r}
+cumsum(table(baseline$Adm12a, baseline$Adm11, useNA = "ifany"))
+```
+
+
+```{r}
+print("adm12a")
+summary(baseline$Adm12a)
+print("adm12")
+summary(baseline$Adm12)
+print("adm11")
+summary(baseline$Adm11)
+print("adm10")
+summary(baseline$Adm10)
+```
+
+
+```{r}
+baseline$activpro = 0
+```
+
+```{r}
+for(i in 1:(dim(baseline)[1])){
+  
+  if(is.na(baseline$Adm12a[i]))
+    baseline$activpro[i] = NA
+
+  else if (baseline$Adm12a[i] == "JNNN" & baseline$Adm11[i] == 0)
+    baseline$activpro[i] = "T"
+  else if (baseline$Adm12a[i] == "JNNN" & baseline$Adm11[i] != 0 & baseline$Adm12[i] == "6NNNNN")
+    baseline$activpro[i] = "T"
+  else if (baseline$Adm12a[i] == "JNNN" & baseline$Adm11[i] != 0 & baseline$Adm12[i] == "NNNNNN")
+    baseline$activpro[i] = "AR"
+
+  else if (baseline$Adm12a[i] == "N98N" & baseline$Adm10[i] == 85 & baseline$Adm12[i] != "NNN3NN")
+    baseline$activpro[i] = "I"
+  else if (baseline$Adm12a[i] == "N98N" & baseline$Adm10[i] == 85 & baseline$Adm12[i] == "NNN3NN")
+    baseline$activpro[i] = "AR"
+  else if (baseline$Adm12a[i] == "N98N" & baseline$Adm10[i] != 85)
+    baseline$activpro[i] = "R"
+
+  else if (baseline$Adm12a[i] == "N9N7")
+    baseline$activpro[i] = "AR"
+  
+  else if (baseline$Adm12a[i] == "N9NN" & baseline$Adm11[i] != 0 & baseline$Adm12[i] == "N5N3NN")
+    baseline$activpro[i] = "C"
+  else if (baseline$Adm12a[i] == "N9NN" & baseline$Adm11[i] != 0 & baseline$Adm12[i] == "N5NNNN")
+    baseline$activpro[i] = "C"
+  else if (baseline$Adm12a[i] == "N9NN" & baseline$Adm11[i] != 0 & baseline$Adm12[i] == "NNN3NN")
+    baseline$activpro[i] = "C"
+  else if (baseline$Adm12a[i] == "N9NN" & baseline$Adm11[i] != 0 & baseline$Adm12[i] == "NNNNNN" & baseline$Adm10[i] %in% c(85,86))
+    baseline$activpro[i] = "I"
+  else if (baseline$Adm12a[i] == "N9NN" & baseline$Adm11[i] != 0 & baseline$Adm12[i] == "NNNNNN" & (baseline$Adm10[i] %in% c(54,74,77) | is.na(baseline$Adm10[i])))
+    baseline$activpro[i] = "AR"
+  else if (baseline$Adm12a[i] == "N9NN" & baseline$Adm11[i] == 0 & baseline$Adm10[i] %in% c(85,86))
+    baseline$activpro[i] = "I"
+  else if (baseline$Adm12a[i] == "N9NN" & baseline$Adm11[i] == 0 & baseline$Adm10[i] == 77)
+    baseline$activpro[i] = "AR"
+
+  else if (baseline$Adm12a[i] == "NN87")
+    baseline$activpro[i] = "AR"
+  
+
+  else if (baseline$Adm12a[i] == "NN8N" & baseline$Adm11[i] == 0 & baseline$Adm12[i]  == "6NNNNN")
+    baseline$activpro[i] = "T"
+  else if (baseline$Adm12a[i] == "NN8N" & baseline$Adm11[i] == 0 & baseline$Adm12[i] == "NNNNNN" & (is.na(baseline$Adm10[i]) | baseline$Adm10[i] == 85))
+    baseline$activpro[i] = "AR"
+  else if (baseline$Adm12a[i] == "NN8N" & baseline$Adm11[i] == 0 & baseline$Adm12[i] == "NNNNNN"& baseline$Adm10[i] %in% c(74,75,77,78))
+    baseline$activpro[i] = "T"
+  else if (baseline$Adm12a[i] == "NN8N" & baseline$Adm11[i] == 0 & baseline$Adm12[i] == "NNNNNN" & baseline$Adm10[i] == 36)
+    baseline$activpro[i] = "T"
+  else if (baseline$Adm12a[i] == "NN8N" & baseline$Adm11[i] == 1 & baseline$Adm12[i] == "NNN3NN")
+    baseline$activpro[i] = "AR"
+  else if (baseline$Adm12a[i] == "NN8N" & baseline$Adm11[i] == 1 & baseline$Adm12[i] == "NNNNNN")
+    baseline$activpro[i] = "R"
+  else if (baseline$Adm12a[i] == "NN8N" & baseline$Adm11[i] == 2 & (baseline$Adm10[i] %in% c(74,75,77,78) | is.na(baseline$Adm10[i])))
+    baseline$activpro[i] = "R"
+  else if (baseline$Adm12a[i] == "NN8N" & baseline$Adm11[i] == 2 & baseline$Adm10[i] == 85)
+    baseline$activpro[i] = "I"
+  else if (baseline$Adm12a[i] == "NN8N" & baseline$Adm11[i] == 3)
+    baseline$activpro[i] = "R"
+  else if (baseline$Adm12a[i] == "NN8N" & baseline$Adm11[i] == 4 & baseline$Adm12[i] != "NNNNNN")
+    baseline$activpro[i] = "AR"
+  else if (baseline$Adm12a[i] == "NN8N" & baseline$Adm11[i] == 4 & baseline$Adm12[i] == "NNNNNN" & (baseline$Adm10[i] %in% c(74,75,77,78) | is.na(baseline$Adm10[i])))
+    baseline$activpro[i] = "R"
+  else if (baseline$Adm12a[i] == "NN8N" & baseline$Adm11[i] == 4 & baseline$Adm12[i] == "NNNNNN" & baseline$Adm10[i] == 85)
+    baseline$activpro[i] = "I"
+  else if (baseline$Adm12a[i] == "NN8N" & baseline$Adm11[i] == 4 & baseline$Adm12[i] == "NNNNNN" & baseline$Adm10[i] %in% c(32,36,95))
+    baseline$activpro[i] = "AR"
+  else if (baseline$Adm12a[i] == "NN8N" & baseline$Adm11[i] == 5 & baseline$Adm10[i] == 85)
+    baseline$activpro[i] = "I"
+  else if (baseline$Adm12a[i] == "NN8N" & baseline$Adm11[i] == 5 & baseline$Adm10[i] == 77)
+    baseline$activpro[i] = "AR"
+
+  else if (baseline$Adm12a[i] == "NNN7" & baseline$Adm11[i] == 0 & baseline$Adm12[i] != "NNNNNN")
+    baseline$activpro[i] = "C"
+  else if (baseline$Adm12a[i] == "NNN7" & baseline$Adm11[i] == 0 & baseline$Adm12[i] == "NNNNNN" & baseline$Adm10[i] %in% c(36,56))
+    baseline$activpro[i] = "T"
+  else if (baseline$Adm12a[i] == "NNN7" & baseline$Adm11[i] == 0 & baseline$Adm12[i] == "NNNNNN" & baseline$Adm10[i] %in% c(85,86,93,95))
+    baseline$activpro[i] = "AR"
+  else if (baseline$Adm12a[i] == "NNN7" & baseline$Adm11[i] == 1 & baseline$Adm12[i] == "N5NNNN")
+    baseline$activpro[i] = "C"
+  else if (baseline$Adm12a[i] == "NNN7" & baseline$Adm11[i] == 1 & baseline$Adm12[i] == "NNNNNN" & baseline$Adm10[i] == 86)
+    baseline$activpro[i] = "I"
+  else if (baseline$Adm12a[i] == "NNN7" & baseline$Adm11[i] == 1 & baseline$Adm12[i] == "NNNNNN" & baseline$Adm10[i] == 77)
+    baseline$activpro[i] = "R"
+  else if (baseline$Adm12a[i] == "NNN7" & baseline$Adm11[i] == 1 & baseline$Adm12[i] == "NNNNNN" & baseline$Adm10[i] %in% c(93,95,96))
+    baseline$activpro[i] = "C"
+  else if (baseline$Adm12a[i] == "NNN7" & baseline$Adm11[i] == 2 & baseline$Adm12[i] == "N5NNNN")
+    baseline$activpro[i] = "C"
+  else if (baseline$Adm12a[i] == "NNN7" & baseline$Adm11[i] == 2 & baseline$Adm12[i] == "NNNNNN" & baseline$Adm10[i] %in% c(93,95,96))
+    baseline$activpro[i] = "C"
+  else if (baseline$Adm12a[i] == "NNN7" & baseline$Adm11[i] == 2 & baseline$Adm12[i] == "NNNNNN" & baseline$Adm10[i] == 86)
+    baseline$activpro[i] = "I"
+  else if (baseline$Adm12a[i] == "NNN7" & baseline$Adm11[i] == 2 & baseline$Adm12[i] == "NNNNNN" & baseline$Adm10[i] == 74)
+    baseline$activpro[i] = "R"
+  else if (baseline$Adm12a[i] == "NNN7" & baseline$Adm11[i] == 3 & baseline$Adm12[i] == "N5NNNN")
+    baseline$activpro[i] = "C"
+  else if (baseline$Adm12a[i] == "NNN7" & baseline$Adm11[i] == 3 & baseline$Adm12[i] == "NNNNNN" & baseline$Adm10[i] %in% c(95,96))
+    baseline$activpro[i] = "C"
+  else if (baseline$Adm12a[i] == "NNN7" & baseline$Adm11[i] == 3 & baseline$Adm12[i] == "NNNNNN" & baseline$Adm10[i] == 86)
+    baseline$activpro[i] = "I"
+  else if (baseline$Adm12a[i] == "NNN7" & baseline$Adm11[i] == 3 & baseline$Adm12[i] == "NNNNNN" & baseline$Adm10[i] == 77)
+    baseline$activpro[i] = "R"
+  else if (baseline$Adm12a[i] == "NNN7" & baseline$Adm11[i] == 4 & baseline$Adm12[i] == "N5NNNN")
+    baseline$activpro[i] = "C"
+  else if (baseline$Adm12a[i] == "NNN7" & baseline$Adm11[i] == 4 & baseline$Adm12[i] == "NNNNNN" & baseline$Adm10[i] == 54)
+    baseline$activpro[i] = "AR"
+  else if (baseline$Adm12a[i] == "NNN7" & baseline$Adm11[i] == 4 & baseline$Adm12[i] == "NNNNNN" & baseline$Adm10[i] %in% c(85,86))
+    baseline$activpro[i] = "I"
+  else if (baseline$Adm12a[i] == "NNN7" & baseline$Adm11[i] == 4 & baseline$Adm12[i] == "NNNNNN" & baseline$Adm10[i] %in% c(93,95,96))
+    baseline$activpro[i] = "C"
+
+  else if (baseline$Adm12a[i] == "NNNN" & baseline$Adm11[i] == 0 & baseline$Adm12[i] == "NNNNNN" & baseline$Adm10[i] %in% c(31,32,34,36,37,41,46,47,48,51,53,54,55,56,61,66))
+    baseline$activpro[i] = "T"
+  else if (baseline$Adm12a[i] == "NNNN" & baseline$Adm11[i] == 0 & baseline$Adm12[i] == "NNNNNN" & baseline$Adm10[i] %in% c(74,77))
+    baseline$activpro[i] = "R"
+  else if (baseline$Adm12a[i] == "NNNN" & baseline$Adm11[i] == 0 & baseline$Adm12[i] == "NNNNNN" & baseline$Adm10[i] %in% c(85,86))
+    baseline$activpro[i] = "I"
+  else if (baseline$Adm12a[i] == "NNNN" & baseline$Adm11[i] == 0 & baseline$Adm12[i] == "NNNNNN" & is.na(baseline$Adm10[i]))
+    baseline$activpro[i] = "T"
+  else if (baseline$Adm12a[i] == "NNNN" & baseline$Adm11[i] == 0 & baseline$Adm12[i] == "NNNNNN" & baseline$Adm10[i] == 88)
+    baseline$activpro[i] = "AR"
+  else if (baseline$Adm12a[i] == "NNNN" & baseline$Adm11[i] == 0 & baseline$Adm12[i] == "NNNNNN" & baseline$Adm10[i] %in% c(95,96))
+    baseline$activpro[i] = "C"
+  else if (baseline$Adm12a[i] == "NNNN" & baseline$Adm11[i] == 0 & baseline$Adm12[i] == "NNN3NN" & baseline$Adm10[i] == 48)
+    baseline$activpro[i] = "AR"
+  else if (baseline$Adm12a[i] == "NNNN" & baseline$Adm11[i] == 0 & baseline$Adm12[i] == "NNN3NN" & baseline$Adm10[i] != 48)
+    baseline$activpro[i] = "C"
+  else if (baseline$Adm12a[i] == "NNNN" & baseline$Adm11[i] == 0 & baseline$Adm12[i] %in% c("NN4NNN", "NN43NN" , "N5NNNN", "N5N3NN"))
+    baseline$activpro[i] = "C"
+  else if (baseline$Adm12a[i] == "NNNN" & baseline$Adm11[i] == 0 & baseline$Adm12[i] %in% c("6NNNNN", "6NN3NN", "6N43NN", "65NNNN", "65N3NN"))
+    baseline$activpro[i] = "T"
+  else if (baseline$Adm12a[i] == "NNNN" & baseline$Adm11[i] == 1 & baseline$Adm12[i] == "NNNNNN" & baseline$Adm10[i] %in% c(54,95,96))
+    baseline$activpro[i] = "C"
+  else if (baseline$Adm12a[i] == "NNNN" & baseline$Adm11[i] == 1 & baseline$Adm12[i] == "NNNNNN" & baseline$Adm10[i] == 86)
+    baseline$activpro[i] = "I"
+  else if (baseline$Adm12a[i] == "NNNN" & baseline$Adm11[i] == 1 & baseline$Adm12[i] %in% c("NNN3NN", "NN4NNN", "NN43NN", "N5NNNN", "N5N3NN", "N543NN"))
+    baseline$activpro[i] = "C"
+  else if (baseline$Adm12a[i] == "NNNN" & baseline$Adm11[i] == 1 & baseline$Adm12[i] %in% c("6NNNNN", "6NN3NN", "6N4NNN", "6N43NN", "65NNNN", "65N3NN"))
+    baseline$activpro[i] = "C"
+  else if (baseline$Adm12a[i] == "NNNN" & baseline$Adm11[i] == 2 & baseline$Adm12[i] == "NNNNNN" & baseline$Adm10[i] %in% c(95,96))
+    baseline$activpro[i] = "C"
+  else if (baseline$Adm12a[i] == "NNNN" & baseline$Adm11[i] == 2 & baseline$Adm12[i] == "NNNNNN" & baseline$Adm10[i] == 86)
+    baseline$activpro[i] = "I"
+  else if (baseline$Adm12a[i] == "NNNN" & baseline$Adm11[i] == 2 & baseline$Adm12[i] %in% c("NNN3NN", "N5NNNN", "N5N3NN"))
+    baseline$activpro[i] = "C"
+  else if (baseline$Adm12a[i] == "NNNN" & baseline$Adm11[i] == 2 & baseline$Adm12[i] == "6NN3NN")
+    baseline$activpro[i] = "T"
+  else if (baseline$Adm12a[i] == "NNNN" & baseline$Adm11[i] == 3 & baseline$Adm12[i] == "NNNNNN" & baseline$Adm10[i] == 56)
+    baseline$activpro[i] = "AR"
+  else if (baseline$Adm12a[i] == "NNNN" & baseline$Adm11[i] == 3 & baseline$Adm12[i] == "NNNNNN" & baseline$Adm10[i] != 56)
+    baseline$activpro[i] = "C"
+  else if (baseline$Adm12a[i] == "NNNN" & baseline$Adm11[i] == 3 & baseline$Adm12[i] %in% c("NNN3NN", "N5NNNN", "N5N3NN"))
+    baseline$activpro[i] = "C"
+  else if (baseline$Adm12a[i] == "NNNN" & baseline$Adm11[i] == 3 & baseline$Adm12[i] %in% c("65NNNN", "6NNNNN"))
+    baseline$activpro[i] = "T"
+  
+  else if (baseline$Adm12a[i] == "NNNN" & baseline$Adm11[i] == 4 & baseline$Adm12[i] == "NNNNNN" & baseline$Adm10[i] %in% c(77,74))
+    baseline$activpro[i] = "R"
+  else if (baseline$Adm12a[i] == "NNNN" & baseline$Adm11[i] == 4 & baseline$Adm12[i] == "NNNNNN" & baseline$Adm10[i] %in% c(95,96))
+    baseline$activpro[i] = "C"
+  else if (baseline$Adm12a[i] == "NNNN" & baseline$Adm11[i] == 4 & baseline$Adm12[i] == "NNNNNN" & baseline$Adm10[i] %in% c(85,86))
+    baseline$activpro[i] = "I"
+  else if (baseline$Adm12a[i] == "NNNN" & baseline$Adm11[i] == 4 & baseline$Adm12[i] == "NNNNNN" & baseline$Adm10[i] %in% c(55,54,51,48,47,36,32))
+    baseline$activpro[i] = "AR"
+  else if (baseline$Adm12a[i] == "NNNN" & baseline$Adm11[i] == 4 & baseline$Adm12[i] == "NN4NNN")
+    baseline$activpro[i] = "C"
+  else if (baseline$Adm12a[i] == "NNNN" & baseline$Adm11[i] == 4 & baseline$Adm12[i] == "NNN3NN" & baseline$Adm10[i] == 85)
+    baseline$activpro[i] = "AR"
+  else if (baseline$Adm12a[i] == "NNNN" & baseline$Adm11[i] == 4 & baseline$Adm12[i] == "NNN3NN" & baseline$Adm10[i] != 85)
+    baseline$activpro[i] = "C"
+  else if (baseline$Adm12a[i] == "NNNN" & baseline$Adm11[i] == 4 & baseline$Adm12[i] == "NN4NNN")
+    baseline$activpro[i] = "C"
+  else if (baseline$Adm12a[i] == "NNNN" & baseline$Adm11[i] == 4 & baseline$Adm12[i] == "NN43NN") ## !!
+    baseline$activpro[i] = "C"
+  else if (baseline$Adm12a[i] == "NNNN" & baseline$Adm11[i] == 4 & baseline$Adm12[i] == "N5NNNN" & baseline$Adm10[i] == 86)
+    baseline$activpro[i] = "I"
+  else if (baseline$Adm12a[i] == "NNNN" & baseline$Adm11[i] == 4 & baseline$Adm12[i] == "N5NNNN" & baseline$Adm10[i] != 86)
+    baseline$activpro[i] = "C"
+  else if (baseline$Adm12a[i] == "NNNN" & baseline$Adm11[i] == 4 & baseline$Adm12[i] == "N5N3NN")
+    baseline$activpro[i] = "C"
+  else if (baseline$Adm12a[i] == "NNNN" & baseline$Adm11[i] == 4 & baseline$Adm12[i] %in% c("6NNNNN" , "65NNNN"))
+    baseline$activpro[i] = "T"
+  else if (baseline$Adm12a[i] == "NNNN" & baseline$Adm11[i] == 5 & baseline$Adm12[i] %in% c("N5NNNN", "N5N3NN"))
+    baseline$activpro[i] = "C"
+  
+}
+```
+
+```{r}
+table(baseline$activpro)
+```
+
+```{r}
+#baseline$Adm12a[which(baseline$age0[baseline$activpro == "AR"] > 62)]
+length(which(baseline$age0[baseline$activpro == "AR"] > 62 & baseline$Adm11[baseline$activpro == "AR"] %in% c(1,2,3,4) & baseline$Adm12[baseline$activpro == "AR"] == "NNNNNN"))
+```
+
+
+# Exploration
+
+## En brut Qm73 et actvpro
+```{r}
+sum(is.na(baseline$activpro))
+sum(is.na(baseline$Qm73))
+```
+
+```{r}
+round(prop.table(table(baseline$activpro, baseline$Qm73 ),1)*100,1) #(= 100 en ligne)
+```
+```{r}
+round(prop.table(table(baseline$activpro, baseline$Qm73_bin ),1)*100,1) #(= 100 en ligne)
+```
+41.2 % des retraités ont une "mauvaise santé perçue" contre 43.2 % des travailleurs.
+Pour vérifier si le départ à la retraite implique une hausse de la srh il faut selectionner les individus encore actif dans la baseline et retraités dans le suivis à 6ans et comparer les srh avant aprés.
+Combien d'individus sont selectionnables pour cette étude ?
+
+```{r}
+length(which(suivi_6$Retraite[baseline$nepp3[which(baseline$activpro == "T")]] == ))
+```
+
+```{r}
+chisq.test(baseline$activpro, baseline$Qm73)
+```
+```{r}
+chisq.test(baseline$actpro, baseline$Qm73)
+```
+La non significativité trouvée au début de était donc bien due à un mauvais affinage de la variable traitant de l'activité pro.
+```{r}
+round(prop.table(table(baseline$Qm73_bin, baseline$activpro ),2)*100,2) #( = 100 en colonnes)
+```
+```{r}
+chisq.test(baseline$activpro, baseline$Qm73_bin)
+```
+
+## En stratifiant sur l'Age que passa ???
+
+```{r}
+hist(log(baseline$age0))
+```
+```{r}
+library(ggplot2)
+```
+
+
+Déja on regarde la distribution de l'Age pour nos 5 catégories de la var activpro
+```{r}
+ggplot(baseline[which(baseline$activpro == "R"),], aes(x = baseline$age0[which(baseline$activpro == "R")])) + geom_histogram(color = "white", fill = "black") + ggtitle("Distribution de l'Ã¢ge chez les retraitÃ©s") +geom_vline(aes(xintercept=mean(baseline$age0[which(baseline$activpro == "R")])), color="red", linetype="dashed", size=2)
+```
+```{r}
+ggplot(baseline[which(baseline$activpro == "T"),], aes(x = baseline$age0[which(baseline$activpro == "T")])) + geom_histogram(color = "white", fill = "black") + ggtitle("Distribution de l'Ã¢ge chez les travailleurs") +geom_vline(aes(xintercept=mean(baseline$age0[which(baseline$activpro == "T")])), color="red", linetype="dashed", size=2)
+```
+
+
+On voit clairement que les retraitÃ©s ont globalement plus de 60 ans et que les travailleurs moins de 60 ans.
+
+Pour Être plus précis:
+```{r}
+summary(baseline$age0[which(baseline$activpro == "R")])
+```
+```{r}
+summary(baseline$age0[which(baseline$activpro == "T")])
+```
+Il peut être interressant de ragarder la distribution des ages chez les chômeurs
+```{r}
+ggplot(baseline[which(baseline$activpro == "C"),], aes(x = baseline$age0[which(baseline$activpro == "C")])) + geom_histogram(color = "white", fill = "black") + ggtitle("Distribution de l'Ã¢ge chez les chÃ´meurs") +geom_vline(aes(xintercept=mean(baseline$age0[which(baseline$activpro == "C")])), color="red", linetype="dashed", size=2)
+```
+La santÃ© perçue subit-elle un effet âge ?
+
+```{r}
+ggplot(baseline, aes(x = Qm73, y = age0)) + geom_boxplot(aes(fill = Qm73))
+```
+```{r}
+ggplot(baseline, aes(x = Qm73_bin, y = age0)) + geom_boxplot(aes(fill = Qm73_bin))
+```
+Le lien n'est pas flagrant
+
+Quel test pour lien entre variable continue et variable catÃ©gorielle ?
+normale anova
+pas normale kruskal wallis 
+
+```{r}
+anova1 <- aov(log(baseline$age0) ~  baseline$Qm73, data = baseline) 
+summary(anova1)
+```
+
+Quel lien entre activpro et age0 ?
+
+```{r}
+ggplot(baseline, aes(x = activpro, y = age0)) + geom_boxplot(aes(fill = activpro)) +ggtitle("Age par classe d'acticité pro")
+
+```
+Pas de surpise concernat les retraités, ils sont plus vieux que les travailleurs.
+La population ds chômeurs est pluôt jeune.
+
+A vérifier!! question dela rupture conventionnelle
+
+
+séparons les hommes et les femmes 
+```{r}
+ggplot(baseline, aes(x = activpro, y = age0 , fill = baseline$sexe)) + geom_boxplot(aes(fill = sexe)) +ggtitle("Age par classe d'acticité pro par genre")
+
+```
+
+
+
+
+
+
+## classes d'Âge
+```{r}
+summary(baseline$age0)
+```
+```{r}
+library(questionr)
+summary(quant.cut(baseline$age0, 5))
+
+```
+```{r}
+baseline$age0Cut = cut(baseline$age0, c(48,53.6,57.3,60.8,65,87))
+summary(baseline$age0Cut)
+```
+
+
+```{r}
+length(which(baseline$age0 >= 48 & baseline$age0 <= 51))
+length(which(baseline$age0 > 51 & baseline$age0 < 54))
+length(which(baseline$age0 >= 54 & baseline$age0 < 57))
+```
+
+
+
+```{r}
+round(prop.table(table(baseline$activpro, baseline$sexe),1)*100,2)
+```
+
+
+Parmis les retraitÃ©  44.47 % sont des femmes, 55.53 % sont des hommes.
+Parmis ceux qui travaillent 33.77 % sont des femmes, 66.23 % sont des hommes.
+
+La difference Homme/Femme semble significative pour les chÃ´meurs, les inactifs et les travailleurs.
+```{r}
+chisq.test(baseline$activpro, baseline$sexe)
+```
+```{r}
+round(prop.table(table(baseline$activpro, baseline$sexe),2)*100,3)
+```
+
+Plus de 80 % des femmes de la cohorte sont R/T.
+Idem pour les hommes.
+
+```{r}
+bl_F = baseline[which(baseline$sexe == "F"),]
+bl_H = baseline[which(baseline$sexe == "H"),]
+```
+
+```{r}
+table(bl_F)
+```
+
