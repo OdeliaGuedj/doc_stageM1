@@ -1,0 +1,42 @@
+Méthode générale d'analyse.
+
+Trois types danalyse:
+
+	1. Analyse descriptive
+
+Description des données, exploration, permet de detecter outliers.
+On fait des graphes et des tableaux.
+Si variable quantitative, le tab contient moyenne, ecart type, Q1,Q3, min et max.
+Dans ce cas le graphe = histogramme (distribution des vars)
+Si var qualitative tab contient effectif de chaque classe
+Le graphe est alors un barplot et represente repartition dans chaque classe
+
+	2. Analyse univariée
+
+Etudie la relation entre deux varaibles. On se demmande si la difference entre
+deux individus est est réelle ou due au hasard
+Repose sur tests satistiques (pvalue)
+Si var_num + var qualitative 
+		si deux groupes
+			si > 30 ind dans chaque gpe : test de student
+			sinon test de Mann-Whitney
+		si plus de 2 gpe			
+			si chq gpe > 5 : test du chi2
+			sinon : test de fisher
+Ne prend pas compte du facteur de confusion.
+Ex : effet traitement sur survie en fonction de sexe et age. Si test dit oui (pv < 0.05) 
+est ce que c'est dû au sexe ou à l'âge ?
+
+	3. Analyse multivariée
+
+Prend en compte facteur de confusion en ajustant sur ces facteurs.
+Util pour étudier lien entre plusieurs variables
+Dans ex prec grace a ajustement sur age on pourait dire: 
+	si h° et f° avaient meme age alors le test donnerait..
+Comment ? Avec logit, reg_lin, cox
+On peut mesuer a quel point un facteur agit sur le label0
+Comemnt ?
+	logit: odd ratio
+	cox: hazard ratio
+	reg_lin : estimates/coeff
+			

@@ -1,0 +1,56 @@
+Les données répétées = Les données longitudinales
+(Regression logistique avec données corrélées)
+
+C'est quoi ? 
+Des données telles que pour chaque individus on a des observations des variables
+à différents instants.
+
+Et alors ? 
+Le probleme c'est que la plupart des modèles stat (dont le logit) supposent l'indépendance des observations faites
+sur un même sujet.
+Or s'il s'agit des même obs mais à des temps differents cette supposition is craaazzyy
+On appelle ça la correlation intra-individus.
+
+ça interesse qui ? 
+Ba les medecins, biologistes... Le monde médical quoi.
+Pour des raisons évidentes.
+
+On fait quoi alors ?
+On prends en compte la corrélation en introduisant dans le modèle une structure de covariance
+
+
+Concretement, les maths:
+n = nbr ind
+Y_i = vecteurs des variables dependantes de l'ind i
+Y_i = (Y_i1,...,Y_ini)'
+ni = nbr mesures pour ind i
+N = nbr total d'obs (somme sur i de 1 à n des ni)
+x_i = matrice des variables independantes pour i
+x_i = (x_i1,...,xini)'
+
+On utilise une matrice appelée matrice de corrélation de travail notée R_i(alpha) ou alpha est le 
+vecteur des parametres de corrélation à estimer.
+
+Il y a plusieurs structures de corrélation possible.
+Si nous donnons la mauvaise au modele, les estimations de béta seront quand même justes mais moins précises.
+	1. structure de type 'independante'
+Pas de corrélation entre Y_ij et Y_ij' quand j different de j'
+	2. structure de type "echangeable"
+la corrélation entre deux observations d'un meme individu i est la meme pour toutes paires d'obs
+notée alpha
+	3.structure de type "non-structuré"
+les correlations entre les obs d'un individu sont différentes pour chaque paires d'obs
+	4.structure de type AR(1) (cf cours séries temporelles modele autoregressif)
+correlation entre deux observations d'un meme individu i diminue de manière géométrique qaund les 
+observations s'éloignent.
+
+
+
+Pdf utils, checker les equations maths, faire résumer
+Demmander infos à Mme Guilloux.
+
+https://www.math.univ-toulouse.fr/~besse/Wikistat/pdf/st-m-modmixt7-mesrepet.pdf
+
+https://archimede.mat.ulaval.ca/theses/B-Beauregard_13.pdf
+
+https://archimede.mat.ulaval.ca/pages/duchesne/URESPnov2007Duchesne.pdf
