@@ -5,15 +5,12 @@ editor_options:
   chunk_output_type: inline
 ---
 
-```{r}
-setwd(dir = "W:/Odélia/projet3")
-```
 
 ```{r}
 getwd()
-baseline = read.csv(file = "W:/Odélia/projet2/data/inclusion/Baseline20190215.csv", header = TRUE, row.names = NULL, sep = ';')
-suivi_6 = read.csv(file = "W:/Odélia/projet2/data/6_ans/suivi6.csv", header = TRUE, row.names = NULL, sep = ";")
-suivi_4 = read.csv(file = "W:/Odélia/projet2/data/4_ans/suivi4.csv", header = TRUE, row.names = NULL, sep = ";")
+baseline = read.csv(file = "W:/Odélia/projet_stage/data/inclusion/Baseline20190215.csv", header = TRUE, row.names = NULL, sep = ';')
+suivi_6 = read.csv(file = "W:/Odélia/projet_stage/data/6_ans/suivi6.csv", header = TRUE, row.names = NULL, sep = ";")
+suivi_4 = read.csv(file = "W:/Odélia/projet_stage/data/4_ans/suivi4.csv", header = TRUE, row.names = NULL, sep = ";")
 ```
 
 # prÃ©liminaires
@@ -137,7 +134,7 @@ sum(is.na(baseline$Adm10))
 sum(is.na(baseline$Adm11))
 ```
 
-Pour créer la variable on fixe omme variables principales Adm12a et Adm11 puis on "ajuste" avec Adm12 et Adm10
+Pour créer la variable on fixe comme variables principales Adm12a et Adm11 puis on "ajuste" avec Adm12 et Adm10
 
 ```{r}
 table(baseline$Adm12a, baseline$Adm11, useNA = "ifany")
