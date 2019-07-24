@@ -1,0 +1,63 @@
+                                                                                                                                                                                                                                                                                         ---
+title: "R Notebook"
+output: html_notebook
+---
+```{r}
+round(prop.table(table(baselineP4$srhBin, baselineP4$tabac),2)*100,2)
+```
+```{r}
+table(baselineP4$srhBin, baselineP4$tabac)
+```
+
+```{r}
+sum(is.na(baselineP3$Qm16))
+```
+
+```{r}
+ggplot(baseline$P4, aes(baselineP4$tabac, fill = baselineP4$srhBin)) + geom_bar(position="dodge", stat="count")
+```
+```{r}
+df4 = as.data.frame(cbind(rbind("arret_cours", "fum_act", "non_fum", "anc_fum"),
+                          rbind(round(mean(baselineP4$srhNum[which(baselineP4$tabac == "arret_cours")]),2),
+                                round(mean(baselineP4$srhNum[which(baselineP4$tabac == "fum_act")]),2),
+                                round(mean(baselineP4$srhNum[which(baselineP4$tabac == "non_fum")]),2),
+                                round(mean(baselineP4$srhNum[which(baselineP4$tabac == "anc_fum")]),2))))
+df4
+```
+```{r}
+ggplot(df4, aes(df4[,1], df4[,2])) + geom_point() + ggtitle("Moyenne de santé perçue chez les fumeurs, non fumeurs, anciens fumeurs \n et fumeurs en cours d'arrêt")
+```
+
+```{r}
+reg_log_tabac = glm(baselineP4$srhBin ~ baselineP4$tabac, data = baselineP4, family = "binomial")
+summary(reg_log_tabac)
+odds.ratio(reg_log_tabac)
+```
+```{r}
+summary(baselineP4$tabac)
+```
+
+
+```{r}
+reg_lin_tabac = glm(baselineP4$srhNum ~baselineP4$tabac, data = baselineP4, family = "gaussian")
+summary(reg_lin_tabac)
+confint(reg_lin_tabac)
+```
+```{r}
+summary(baselineP4$sexe)
+```
+
+
+```{r}
+model5_log = glm(baselineP4$srhBin ~ baselineP4$activpro + baselineP4$sexe + baselineP4$age0 + baselineP4$entourage + baselineP4$tabac, data = baselineP4, family = "binomial") 
+summary(model4_log)
+odds.ratio(model4_log)
+```
+```{r}
+chisq.test(baselineP4$activpro, baselineP4$tabac)
+```
+```{r}
+model5_lin = glm(baselineP4$srhNum ~ baselineP4$activpro + baselineP4$sexe + baselineP4$age0 + baselineP4$entourage + baselineP4$tabac, data = baselineP4, family = "gaussian") 
+summary(model4_log)
+confint(model4_log)
+```

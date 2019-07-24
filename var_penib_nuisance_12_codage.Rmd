@@ -1,0 +1,58 @@
+---
+title: "Penible nuisance 12"
+output: html_notebook
+---
+
+	qm7	Exposition + 12 mois produits chimiques volatils	
+	    0	Non				
+			1	Oui					
+									
+	qm8	exposition + 12 poussières minérales	
+	    0	Non					
+			1	Oui					
+```{r}
+baseline$Qm7 = as.factor(baseline$Qm7)
+baseline$Qm8 = as.factor(baseline$Qm8)
+```
+
+```{r}
+baseline$Qm7[which(baseline$Qm7 == "")] = NA
+baseline$Qm8[which(baseline$Qm8 == "")] = NA
+```
+
+```{r}
+summary(baseline$Qm7)
+```
+
+```{r}
+summary(baseline$Qm8)
+```
+
+```{r}
+baseline$penib_nuisance_12 ='t'
+for(p in 1:(dim(baseline)[1])){
+  if (is.na(baseline$Qm7[p]) | is.na(baseline$Qm8[p]))
+    baseline$penib_nuisance_12[p] = NA
+  else if (baseline$Qm7[p] == 1 | baseline$Qm8[p] == 1)
+    baseline$penib_nuisance_12[p] = 1
+  else
+    baseline$penib_nuisance_12[p] = 0
+}
+```
+
+```{r}
+baseline$penib_nuisance_12 = as.factor(baseline$penib_nuisance_12)
+```
+
+```{r}
+summary(baseline$penib_nuisance_12)
+```
+```{r}
+boxplot(baseline$srhNum ~ baseline$penib_nuisance_12,names=c("Non Nuisance","Nuisance"),col=c("blue","pink"))
+```
+```{r}
+boxplot(baseline$srhNum ~ baseline$Qm7,names=c("Non Nuisance","Nuisance"),col=c("blue","pink"))
+```
+```{r}
+boxplot(baseline$srhNum ~ baseline$Qm8,names=c("Non Nuisance","Nuisance"),col=c("blue","pink"))
+```

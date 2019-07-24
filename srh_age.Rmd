@@ -1,0 +1,141 @@
+---
+title: "Lien srh age + modele 2"
+output: html_notebook
+---
+
+```{r}
+library(questionr)
+reg_log_age = glm(baselineP2$srhBin ~ baselineP2$age0 , data = baseline$P2, family = 'binomial')
+summary(reg_log_age)
+odds.ratio(reg_log_age)
+```
+```{r}
+reg_lin_age = glm(baselineP2$srhNum ~ baselineP2$age0, data = baselineP2, family = "gaussian")
+summary(reg_lin_age)
+confint(reg_lin_age)
+```
+```{r}
+plot( baselineP2$srhNum,baselineP2$age0)
+```
+
+```{r}
+baseline$activpro = relevel(baseline$activpro, ref = "T")
+```
+
+
+```{r}
+model2_log = glm(baselineP2$srhBin ~ baselineP2$activpro + 
+                                        baselineP2$age0 +
+                                              baselineP2$sexe, data = baselineP2, family = "binomial")
+summary(model2_log)
+odds.ratio(model2_log)
+```
+```{r}
+summary(baselineP2$activpro)
+```
+
+
+```{r}
+model2bis_log = glm(baselineP2$srhBin ~ baselineP2$activpro + 
+                                        baselineP2$age0 +
+                                          baselineP2$sexe +
+                                            baselineP2$age0*baselineP2$activpro, data = baselineP2, family = "binomial")
+summary(model2bis_log)
+```
+```{r}
+model2_lin = glm(baselineP2$srhNum ~ baselineP2$activpro + 
+                                        baselineP2$age0 +
+                                              baselineP2$sexe, data = baselineP2, family = "gaussian")
+summary(model2_lin)
+confint(model2_lin)
+```
+## Age == facteur de confusion ??
+```{r}
+ggplot(baselineP2, aes(x = baselineP2$age0Cut, y = baselineP2$srhNum)) + geom_boxplot() + ggtitle("Distribution de la santé perçue par classe d'âge")
+```
+
+
+
+
+## Stratification sur l'âge
+
+
+```{r}
+library(questionr)
+reg_log_ageCut = glm(baselineP2$srhBin ~ baselineP2$age0Cut, data = baselineP2, family = "binomial")
+summary(reg_log_ageCut)
+odds.ratio(reg_log_ageCut)
+```
+```{r}
+summary(baselineP2$age0Cut)
+```
+
+```{r}
+reg_lin_ageCut = glm(baselineP2$srhNum ~ baselineP2$age0Cut, data = baselineP2, family = "gaussian")
+summary(reg_lin_ageCut)
+confint(reg_lin_ageCut)
+```
+```{r}
+library(questionr)
+model3_log = glm(baselineP2$srhBin ~ baselineP2$activpro + baselineP2$sexe + baselineP2$age0Cut, data = baselineP2, family = "binomial")
+summary(model3_log)
+odds.ratio(model3_log)
+```
+```{r}
+summary(baselineP2$age0Cut)
+```
+
+
+```{r}
+model3_lin = glm(baselineP2$srhNum ~ baselineP2$activpro + baselineP2$sexe + baselineP2$age0Cut, data = baselineP2, family = "gaussian")
+summary(model3_lin)
+confint(model3_lin)
+```
+## Graphe résumé
+
+```{r}
+levels(baselineP2$age0Cut)
+```
+
+
+```{r}
+# Y = c( round(mean(baselineP2$srhNum[which(baselineP2$age0Cut == "[0,58)")]),2), 
+        #round(mean(baselineP2$srhNum[which(baselineP2$age0Cut == "[58,59)")]),2),
+        #round(mean(baselineP2$srhNum[which(baselineP2$age0Cut == "[59,60)")]),2),
+        #round(mean(baselineP2$srhNum[which(baselineP2$age0Cut == "[60,61)")]),2),        
+        #round(mean(baselineP2$srhNum[which(baselineP2$age0Cut == "[61,62)")]),2),
+        #round(mean(baselineP2$srhNum[which(baselineP2$age0Cut == "[62,64)")]),2),
+        #round(mean(baselineP2$srhNum[which(baselineP2$age0Cut == "[64,65)")]),2),
+        #round(mean(baselineP2$srhNum[which(baselineP2$age0Cut == "[65,70)")]),2),
+        #round(mean(baselineP2$srhNum[which(baselineP2$age0Cut == "[70,75)")]),2),
+        #round(mean(baselineP2$srhNum[which(baselineP2$age0Cut == "[75,90)")]),2))
+
+
+
+
+
+```
+
+
+
+```{r}
+#X = c( "[0,58)","[58,59)", "[59,60)", "[60,61)" ,"[61,62)" ,"[62,64)", "[64,65)" ,"[65,70)", "[70,75)", "[75,90)")
+```
+
+
+```{r}
+#df_graphe = as.data.frame(cbind(X,Y))
+```
+
+```{r}
+#df_graphe
+```
+
+
+```{r}
+#ggplot(df_graphe ,aes(df_graphe$X,df_graphe$Y)) +geom_point(col = "blue")  + ggtitle("Moyenne de santé perçue par classes d'âge") + xlab("Classes d'âge") + ylab("Santé perçue moyenne") 
+```
+
+```{r}
+summary(baselineP2$age0[which(baselineP2$activpro == "R")])
+```

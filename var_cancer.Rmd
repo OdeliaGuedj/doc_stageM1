@@ -1,0 +1,25 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+```{r}
+summary(baseline$Qm67)
+```
+
+```{r}
+na_cancer_id = baseline$nepp3[which(is.na(baseline$Qm67))]
+```
+
+```{r}
+chisq.test(baseline$srhBin, baseline$Qm67)
+```
+
+```{r}
+mean(baselineP1$srhNum[which(baselineP1$Qm67 == 0)])
+mean(baselineP1$srhNum[which(baselineP1$Qm67 == 1)])
+
+```
+
+
+

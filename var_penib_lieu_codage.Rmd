@@ -1,0 +1,315 @@
+---
+title: "Codage Variable penibilité "
+output: html_notebook
+---
+
+```{r}
+baseline$Qm4 = as.factor(baseline$Qm4)
+baseline$Qm4a = as.factor(baseline$Qm4a)
+baseline$Qm5 = as.factor(baseline$Qm5)
+baseline$Qm5a = as.factor(baseline$Qm5a)
+baseline$Qm6 = as.factor(baseline$Qm6)
+baseline$Qm6a = as.factor(baseline$Qm6a)
+baseline$Qm7 = as.factor(baseline$Qm7)
+baseline$Qm8 = as.factor(baseline$Qm8)
+```
+
+# variable penib_lieu
+
+qm4	travaillez-vous		
+6XXXXX = établissement scolaire
+X5XXXX = magasin ou restaurant
+XX4XXX = bureau
+XXX3XX = hall d'usine
+XXXX2X = atelier
+XXXXX1 = à domicile
+			
+qm4a	travaillez-vous (2ème ligne de réponses)		
+9XX = divers
+X8X = plein air
+XX7 = itinérant
+
+```{r}
+levels(baseline$Qm4)
+levels(baseline$Qm4a)
+```
+
+```{r}
+which(baseline$Qm4 == "")
+which(baseline$Qm4a == "")
+```
+
+```{r}
+baseline$Qm4[which(baseline$Qm4 == "")] = NA
+baseline$Qm4a[which(baseline$Qm4a == "")] = NA
+```
+
+```{r}
+which(baseline$Qm4 == "")
+which(baseline$Qm4a == "")
+```
+
+
+```{r}
+sum(is.na(baseline$Qm4))
+sum(is.na(baseline$Qm4a))
+
+```
+```{r}
+length(which(is.na(baseline$Qm4) & is.na(baseline$activpro) ))
+```
+
+```{r}
+
+tab = as.data.frame.matrix(table(baseline$Qm4, baseline$Qm4a,  useNA = "always" ))
+tab
+#write.csv2(tab,'W:/Odélia/srh_retraite/data/tab.csV')
+```
+```{r}
+summary(baseline$Adm10[which(baseline$Qm4 == "NNNNNN" & baseline$Qm4a == "NNN")])
+```
+```{r}
+summary(baseline$activpro[which(baseline$Qm4 == "NNNNNN" & baseline$Qm4a == "NNN" & baseline$Adm10 == 78)])
+```
+```{r}
+summary(baseline$activpro[which(baseline$Qm4 == "NNNNNN" & baseline$Qm4a == "NNN" & baseline$Adm10 == 93)])
+```
+```{r}
+summary(baseline$activpro[which(baseline$Qm4 == "NNNNNN" & baseline$Qm4a == "NNN" & baseline$Adm10 == 94)])
+```
+```{r}
+summary(baseline$activpro[which(baseline$Qm4 == "NNNNNN" & baseline$Qm4a == "NNN" & baseline$Adm10 == 95)])
+```
+```{r}
+summary(baseline$activpro[which(baseline$Qm4 == "NNNNNN" & baseline$Qm4a == "NNN" & baseline$Adm10 == 96)])
+```
+
+
+
+
+```{r}
+summary(baseline$Adm10[which(baseline$Qm4a == "9NN" & baseline$Qm4 == "NNNNNN")])
+```
+```{r}
+summary(baseline$activpro[which(baseline$Qm4a == "9NN" & baseline$Qm4 == "NNNNNN" & baseline$Adm10 == 74)])
+```
+```{r}
+summary(baseline$activpro[which(baseline$Qm4a == "9NN" & baseline$Qm4 == "NNNNNN" & baseline$Adm10 == 75)])
+```
+```{r}
+summary(baseline$activpro[which(baseline$Qm4a == "9NN" & baseline$Qm4 == "NNNNNN" & baseline$Adm10 == 77)])
+```
+```{r}
+summary(baseline$activpro[which(baseline$Qm4a == "9NN" & baseline$Qm4 == "NNNNNN" & baseline$Adm10 == 78)])
+```
+```{r}
+summary(baseline$activpro[which(baseline$Qm4a == "9NN" & baseline$Qm4 == "NNNNNN" & baseline$Adm10 == 93)])
+```
+```{r}
+summary(baseline$activpro[which(baseline$Qm4a == "9NN" & baseline$Qm4 == "NNNNNN" & baseline$Adm10 == 94)])
+```
+```{r}
+summary(baseline$activpro[which(baseline$Qm4a == "9NN" & baseline$Qm4 == "NNNNNN" & baseline$Adm10 == 95)])
+```
+```{r}
+summary(baseline$activpro[which(baseline$Qm4a == "9NN" & baseline$Qm4 == "NNNNNN" & baseline$Adm10 == 96)])
+```
+
+```{r}
+summary(baseline$Adm10[which(baseline$Qm4a == "NNN" & baseline$Qm4 == "NN4N2N")])
+```
+
+```{r}
+length(which(baseline$Qm4a == "NNN" & baseline$penib_lieu == "v"))
+summary(baseline$Adm10[which(baseline$Qm4a == "NNN" & baseline$penib_lieu == "v")])
+```
+
+```{r}
+summary(baseline$activpro[which(baseline$Qm4a == "NNN" & baseline$penib_lieu == "v" & baseline$Adm10 == 96)])
+
+```
+```{r}
+summary(baseline$Adm10[which(baseline$Qm4 == "NNNNN1" & baseline$Qm4a == "9NN")])
+
+```
+```{r}
+summary(baseline$Adm10[which(baseline$Qm4 == "NNNN2N" & baseline$Qm4a == "9NN")])
+
+```
+```{r}
+summary(baseline$Adm10[which(baseline$Qm4 == "NNNNNN" & baseline$Qm4a == "98N")])
+
+```
+
+```{r}
+summary(baseline$Adm10[which(baseline$Qm4a == "9NN" & baseline$penib_lieu == "v")])
+```
+
+```{r}
+summary(baseline$Adm10[which(baseline$Qm4a == "987" & baseline$Qm4 == "NNNNNN")])
+```
+
+
+```{r}
+baseline$penib_lieu = 'v'
+
+
+for( k in 1:(dim(baseline)[1])){
+  if(is.na(baseline$Qm4a[k]))
+    baseline$penib_lieu[k] = NA
+  else if (baseline$Qm4[k] == "NNNNNN" & baseline$Qm4a[k] == "NNN" & is.na(baseline$Adm10[k]))
+    baseline$penib_lieu[k] = NA
+  else if( baseline$Qm4[k] == "NNNNNN" & baseline$Qm4a[k] == "NNN" & baseline$Adm10[k] %in% c(32,36,41,47,48,51,54,55,56,74,75,77,85,86,93,94,96))
+    baseline$penib_lieu[k] = 0
+  else if (baseline$Qm4[k] == "NNNNNN" & baseline$Qm4a[k] == "NNN" & baseline$Adm10[k] %in% c(61,66))
+    baseline$penib_lieu[k] = 2
+  else if (baseline$Qm4[k] == "NNNNNN" & baseline$Qm4a[k] == "NNN" & baseline$Adm10[k] == 78 & baseline$activpro[k] == "R")
+    baseline$penib_lieu[k] = 0
+  else if (baseline$Qm4[k] == "NNNNNN" & baseline$Qm4a[k] == "NNN" & baseline$Adm10[k] == 78 & baseline$activpro[k] == "T")
+    baseline$penib_lieu[k] = 2
+  else if (baseline$Qm4[k] == "NNNNNN" & baseline$Qm4a[k] == "NNN" & baseline$Adm10[k] == 95 & baseline$activpro[k] %in% c("C","T"))
+    baseline$penib_lieu[k] = 0
+  else if (baseline$Qm4[k] == "NNNNNN" & baseline$Qm4a[k] == "NNN" & baseline$Adm10[k] == 95 & baseline$activpro[k] == "NSP")
+    baseline$penib_lieu[k] = 'NSP'
+  
+
+  else if(baseline$Qm4a[k] %in% c("NN7","N8N"))
+    baseline$penib_lieu[k] = 2
+
+
+  else if (baseline$Qm4a[k] == "9NN" & baseline$Qm4[k] == "NNNNNN" & baseline$Adm10[k] %in% c(31,32,36,41,46,47,48,51,54,55,56,74,75,78,85,86,93,94,95))
+    baseline$penib_lieu[k] = 0
+  else if (baseline$Qm4a[k] == "9NN" & baseline$Qm4[k] == "NNNNNN" & baseline$Adm10[k] %in% c(61,66))
+      baseline$penib_lieu[k] = 2
+  else if (baseline$Qm4a[k] == "9NN" & baseline$Qm4[k] == "NNNNNN" & baseline$Adm10[k] == 77 & baseline$activpro[k] %in% c("R","T"))
+      baseline$penib_lieu[k] = 0
+  else if (baseline$Qm4a[k] == "9NN" & baseline$Qm4[k] == "NNNNNN" & baseline$Adm10[k] == 77 & baseline$activpro[k] == "NSP")
+      baseline$penib_lieu[k] = "NSP"
+  else if (baseline$Qm4a[k] == "9NN" & baseline$Qm4[k] == "NNNNNN" & baseline$Adm10[k] == 96 & baseline$activpro[k] == "C")
+      baseline$penib_lieu[k] = 0
+  else if (baseline$Qm4a[k] == "9NN" & baseline$Qm4[k] == "NNNNNN" & baseline$Adm10[k] == 96 & baseline$activpro[k] == "T")
+      baseline$penib_lieu[k] = 2
+  
+  
+  else if (baseline$Qm4a[k] == "NNN" & baseline$Qm4[k] == "NN4NNN")
+    baseline$penib_lieu[k] = 0
+  
+  else if (baseline$Qm4a[k] == "NNN" & baseline$Qm4[k] == "NNNNN1")
+    baseline$penib_lieu[k] = 0
+  
+  else if (baseline$Qm4a[k] == "NNN" & baseline$Qm4[k] == "NNNN2N")
+    baseline$penib_lieu[k] = 1
+  
+  else if (baseline$Qm4a[k] == "NNN" & baseline$Qm4[k] == "NN4NN1")
+    baseline$penib_lieu[k] = 0
+    
+  else if (baseline$Qm4a[k] == "NNN" & baseline$Qm4[k] == "N5NNNN")
+    baseline$penib_lieu[k] = 1
+  
+  else if (baseline$Qm4a[k] == "NNN" & baseline$Qm4[k] == "6NNNNN")
+    baseline$penib_lieu[k] = 0
+  
+  else if (baseline$Qm4a[k] == "NNN" & baseline$Qm4[k] == "NNN3NN")
+    baseline$penib_lieu[k] = 1
+  
+  else if (baseline$Qm4a[k] == "9NN" & baseline$Qm4[k] == "NN4NNN")
+    baseline$penib_lieu[k] = 0
+  
+  else if (baseline$Qm4a[k] == "NNN" & baseline$Qm4[k] == "NN4N2N" & baseline$Adm10[k] %in% c(36,48,51,54,56,74,77,95))
+    baseline$penib_lieu[k] = 0
+  else if (baseline$Qm4a[k] == "NNN" & baseline$Qm4[k] == "NN4N2N" & baseline$Adm10[k] %in% c(61,66))
+    baseline$penib_lieu[k] = 2
+  else if (baseline$Qm4a[k] == "NNN" & baseline$Qm4[k] == "NN4N2N" & baseline$Adm10[k] == 47)
+    baseline$penib_lieu[k] = 1
+  
+  else if (baseline$Qm4a[k] == "NNN" & baseline$Qm4[k] %in% c("6N4NN1", "6N4NNN", "6NNNN1"))
+    baseline$penib_lieu[k] = 0
+  
+  else if (baseline$Qm4a[k] == "NNN" & baseline$penib_lieu[k] == "v" & baseline$Adm10[k] %in% c(32,36,48,51,54,55,56,74,77,95,96))
+    baseline$penib_lieu[k] = 0
+  else if (baseline$Qm4a[k] == "NNN" & baseline$penib_lieu[k] == "v" & baseline$Adm10[k] %in% c(61,66))
+    baseline$penib_lieu[k] = 2
+  else if (baseline$Qm4a[k] == "NNN" & baseline$penib_lieu[k] == "v" & baseline$Adm10[k] == 47)
+    baseline$penib_lieu[k] = 1
+  
+  else if (baseline$Qm4a[k] == "N87")
+    baseline$penib_lieu[k] = 2
+  
+  else if (baseline$Qm4a[k] == "9NN" & baseline$Qm4[k] == "NNNNN1" & baseline$Adm10[k] %in% c(32,36,41,51,54,56,74,77,85,93,95))
+    baseline$penib_lieu[k] = 0
+  else if (baseline$Qm4a[k] == "9NN" & baseline$Qm4[k] == "NNNNN1" & baseline$Adm10[k] %in% c(61,66))
+    baseline$penib_lieu[k] = 2
+  
+  else if (baseline$Qm4a[k] == "9NN" & baseline$Qm4[k] == "NNNN2N" & baseline$Adm10[k] %in% c(47,88,48,51,54,56,95,96))
+    baseline$penib_lieu[k] = 1
+  else if (baseline$Qm4a[k] == "9NN" & baseline$Qm4[k] == "NNNN2N" & baseline$Adm10[k] %in% c(61,66,77))
+    baseline$penib_lieu[k] = 2
+  
+   else if(baseline$Qm4a[k] == "9NN" & baseline$penib_lieu[k] == "v" & baseline$Adm10[k] %in% c(32,36,51,54,56,74,77,93,94,95))
+    baseline$penib_lieu[k] = 0
+  else if (baseline$Qm4a[k] == "9NN" & baseline$penib_lieu[k] == "v" & baseline$Adm10[k] == 47)
+    baseline$penib_lieu[k] = 1
+  else if (baseline$Qm4a[k] == "9NN" & baseline$penib_lieu[k] == "v" & baseline$Adm10[k] %in% c(61,66))
+    baseline$penib_lieu[k] = 2
+  
+  else if (baseline$Qm4a[k] %in% c("9N7", "98N", "987"))
+    baseline$penib_lieu[k] = 2
+}
+  
+
+```
+
+
+
+
+```{r}
+table(baseline$penib_lieu, useNA = "always")
+```
+```{r}
+summary(baseline$activpro[which(baseline$penib_lieu == 2)])
+```
+
+
+```{r}
+baseline$penib_lieuBin = 't'
+for (n in 1:(dim(baseline)[1])){
+  if (is.na(baseline$penib_lieu[n]) | baseline$penib_lieu[n] == "NSP")
+    baseline$penib_lieuBin[n] = NA
+  else if (baseline$penib_lieu[n] %in% c(0,1) | (baseline$penib_lieu[n] == 2 & baseline$activpro[n] == "R"))
+    baseline$penib_lieuBin[n] = 0
+  else
+    baseline$penib_lieuBin[n] = 1
+}
+```
+```{r}
+baseline$penib_lieuBin = as.factor(baseline$penib_lieuBin)
+```
+
+```{r}
+summary(baseline$penib_lieuBin)
+```
+```{r}
+boxplot(baseline$srhNum ~ baseline$penib_lieu)
+
+```
+```{r}
+print("low")
+summary(baseline$srhNum[which(baseline$penib_lieu == 0)])
+print("intermediate")
+summary(baseline$srhNum[which(baseline$penib_lieu == 1)])
+print("higth")
+summary(baseline$srhNum[which(baseline$penib_lieu == 2)])
+```
+
+
+
+
+```{r}
+boxplot(baseline$srhNum ~ baseline$penib_lieu)
+```
+
+```{r}
+chisq.test(baseline$Qm73, baseline$penib_lieu)
+```
+
+

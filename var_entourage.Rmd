@@ -1,0 +1,50 @@
+---
+title: "Variable entourage : le sujet est-il seul ?"
+output: html_notebook
+---
+
+qm2	vivez-vous	1	seul(e)	Socio-administratif
+		2	en couple	
+		3	en famille	
+
+
+
+
+
+```{r}
+summary(baseline$qm2)
+```
+
+
+
+```{r}
+for (s in 1:(dim(baseline)[1])){
+  if(is.na(baseline$qm2[s]))
+    baseline$entourage[s] = NA
+  else if (baseline$qm2[s] == 1)
+    baseline$entourage[s] = "seul"
+  else if (baseline$qm2[s] == 2)
+    baseline$entourage[s] = "couple"
+  else if (baseline$qm2[s] == 3)
+    baseline$entourage[s] = "famille"
+}
+
+```
+
+```{r}
+baseline$entourage = as.factor(baseline$entourage)
+```
+```{r}
+summary(baseline$entourage)
+```
+
+
+ # gestion des na
+```{r}
+na_entourage_id = baseline$nepp3[is.na(baseline$entourage)]
+```
+
+```{r}
+length(na_entourage_id)
+```
+

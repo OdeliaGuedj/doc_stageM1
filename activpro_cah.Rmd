@@ -1,0 +1,99 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+```{r}
+library(FactoMineR)
+```
+```{r}
+baseline$Adm10 = as.factor(baseline$Adm10)
+baseline$Adm11 = as.factor(baseline$Adm11)
+baseline$Adm12 = as.factor(baseline$Adm12)
+baseline$Adm12a = as.factor(baseline$Adm12a)
+```
+```{r}
+na_Adm10_id = baseline$nepp3[which(is.na(baseline$Adm10))]
+na_Adm11_id = baseline$nepp3[which(is.na(baseline$Adm11))]
+na_Adm12_id = baseline$nepp3[which(is.na(baseline$Adm12))]
+na_Adm12a_id = baseline$nepp3[which(is.na(baseline$Adm12a))]
+```
+
+```{r}
+na_actproBl_id = unique(c(na_Adm10_id,na_Adm11_id,na_Adm12_id,na_Adm12a_id))
+```
+
+```{r}
+actproBl = baseline[-which(baseline$nepp3 %in% na_actproBl_id),c(1,25,27,29,30,594) ]
+```
+```{r}
+colnames(actproBl)
+```
+
+```{r}
+
+ACM_activpro = MCA(actproBl[2:5])
+```
+
+```{r}
+colnames(actproBl)
+```
+```{r}
+#cah_activpro = HCPC(ACM_activpro ,graph = FALSE)
+```
+
+```{r}
+plot(cah_activpro, choice = "tree")
+```
+```{r}
+plot(cah_activpro, choice = "3D.map")
+```
+```{r}
+plot(cah_activpro, choice = "bar")
+```
+```{r}
+plot(cah_activpro, choice = "map")
+```
+```{r}
+#actproBl$activpro = baseline$activpro[-which(baseline$nepp3 %in% na_actproBl_id)]
+actproBl$activpro_clust = cah_activpro$data.clust$clust
+summary(actproBl$activpro_clust)
+```
+
+
+```{r}
+for(e in 1:(dim(actproBl)[1])){
+  if(actproBl$activpro_clust[e] == 1)
+    actproBl$activpro_clust_name[e] = "T"
+  else if (actproBl$activpro_clust[e] == 2)
+    actproBl$activpro_clust_name[e] = "C"
+  else if (actproBl$activpro_clust[e] == 3)
+    actproBl$activpro_clust_name[e] = "I"
+  else if (actproBl$activpro_clust[e] == 4)
+    actproBl$activpro_clust_name[e] = "R"
+}
+
+```
+
+
+```{r}
+summary(as.factor(actproBl$activpro_clust_name))
+```
+```{r}
+summary(baseline$activpro)
+```
+```{r}
+length(na_actproBl_id)
+```
+
+
+```{r}
+
+```
+
+
+
+
+
+
+

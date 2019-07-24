@@ -1,0 +1,19 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+```{r}
+summary(baseline$Qm9)
+```
+```{r}
+table(baseline$srhBin, baseline$Qm9)
+```
+
+```{r}
+chisq.test(baseline$srhBin, baseline$Qm9)
+```
+```{r}
+round(prop.table(table(baseline$srhBin, baseline$Qm9),1)*100,2)
+```
+

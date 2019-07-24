@@ -1,0 +1,64 @@
+---
+title: "Lien srh sexe + modele 1"
+output: html_notebook
+---
+
+```{r}
+library(questionr)
+reg_log_sex = glm(baselineP$srhBin ~  baselineP$sexe, data = baselineP, family = "binomial")
+summary(reg_log_sex)
+odds.ratio(reg_log_sex)
+```
+```{r}
+reg_lin_sex = glm(baselineP$srhBin ~ baselineP$sexe, data = baselineP, family= "binomial")
+summary(reg_lin_sex)
+confint(reg_lin_sex)
+```
+
+```{r}
+summary(baselineP1$srhNum[which(baselineP1$sexe == "H")])
+```
+```{r}
+summary(baselineP1$srhNum[which(baselineP1$sexe == "F")])
+```
+```{r}
+levels(baselineP1$sexe)
+```
+
+
+```{r}
+library(ggplot2)
+ggplot(baselineP1, aes(x=baselineP1$sexe, y=baselineP1$srhNum)) + geom_boxplot()
+```
+
+
+```{r}
+model1_log = glm(baselineP1$srhBin ~ baselineP1$activpro + baselineP1$sexe, data = baselineP1, family = "binomial")
+summary(model1_log)
+odds.ratio(model1_log)
+```
+```{r}
+model1_log = glm(baselineP1$srhNum ~ baselineP1$activpro + baselineP1$sexe, data = baselineP1, family = "gaussian")
+summary(model1_log)
+confint(model1_log)
+```
+
+
+```{r}
+ggplot(baselineP1, aes(x =  baselineP1$sexe, y = baselineP1$srhNum, fill = baselineP1$activpro)) +
+  geom_boxplot() + ggtitle("Santé perçue chez les hommes et chez les femmes en fonction de l'activité pro")
+```
+
+```{r}
+ggplot(baselineP1, aes(x =  baselineP1$activpro, y = baselineP1$srhNum, fill = baselineP1$sexe)) +
+  geom_boxplot()
+```
+
+
+
+
+
+
+
+
+

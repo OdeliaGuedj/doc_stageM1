@@ -1,0 +1,33 @@
+---
+title: "encodage variable tabac"
+output: html_notebook
+---
+
+```{r}
+baseline$Qm16 = as.factor(baseline$Qm16)
+baseline$Qm17a = as.factor(baseline$Qm17a)
+baseline$Qm17b = as.factor(baseline$Qm17b)
+baseline$Qm17c = as.factor(baseline$Qm17c)
+baseline$Qm17d = as.factor(baseline$Qm17d)
+baseline$Qm17e = as.factor(baseline$Qm17e)
+
+```
+
+```{r}
+summary(baseline$Qm16)
+```
+```{r}
+baseline$tabac[which(baseline$Qm16 == 1)] = "non_fum"
+baseline$tabac[which(baseline$Qm16 == 2)] = "fum_act"
+baseline$tabac[which(baseline$Qm16 == 3)] = "anc_fum"
+baseline$tabac[which(baseline$Qm16 == 4)] = "arret_cours"
+baseline$tabac[which(is.na(baseline$Qm16))] = NA
+baseline$tabac = as.factor(baseline$tabac)
+baseline$tabac = relevel(baseline$tabac , ref  = "non_fum")
+```
+```{r}
+summary(baseline$tabac)
+```
+
+
+

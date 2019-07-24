@@ -1,0 +1,42 @@
+---
+title: "Variable sexe"
+output: html_notebook
+---
+
+
+```{r}
+table(baselineP$sexe)
+```
+```{r}
+sum(is.na(baselineP$sexe))
+```
+
+
+```{r}
+j=0
+for(j in 1:(dim(baseline)[1])){
+  if(baseline$sexe[j] == 0)
+    baseline$sexe[j] = 'F'
+  else if (baseline$sexe[j] == 1)
+    baseline$sexe[j] = 'H'
+}
+```
+
+```{r}
+table(baseline$sexe)
+```
+
+```{r}
+round(  prop.table(   table(baseline$sexe)   )*100  ,1)
+```
+
+```{r}
+baseline$sexe = as.factor(baseline$sexe)
+str(baseline$sexe)
+```
+# Gestion des NA
+```{r}
+sum(is.na(baseline$sexe))
+```
+
+

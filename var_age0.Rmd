@@ -1,0 +1,70 @@
+---
+title: "Variable age0"
+output: html_notebook
+---
+
+```{r}
+summary(baselineP1$age0)
+```
+
+
+```{r}
+baseline$logAge0 = log(baseline$age0)
+```
+
+```{r}
+ggplot(baseline, aes(x = baseline$age0, color = baseline$sexe)) + geom_histogram(fill="white", position="dodge")+
+  theme(legend.position="top") + ggtitle("Distribution de l'âge en fonction du sexe dans la cohorte epp3 \n n = 10157")
+```
+
+
+```{r}
+library(ggplot2)
+ggplot(baseline[which(baseline$sexe == "F"),], aes(x = baseline$age0[which(baseline$sexe == "F")])) + geom_histogram(fill = "pink", color = "red") + ggtitle("Distibution du log de l'âge des femmes")
+```
+
+```{r}
+library(ggplot2)
+ggplot(baseline[which(baseline$sexe == "H"),], aes(x = baseline$age0[which(baseline$sexe == "H")])) + geom_histogram(fill = "green", color = "blue") + ggtitle("Distibution du log de l'âge des femmes")
+```
+#gestion des na et outliers
+
+```{r}
+sum(is.na(baseline$age0))
+```
+```{r}
+length(which(baseline$age0 > 76))
+```
+```{r}
+baseline$age0[which(baseline$age0 > 76)]
+```
+```{r}
+length(baseline$age0[which(baseline$age0 < 50)])
+```
+```{r}
+outliers_age_id = baseline$nepp3[which(baseline$age0 > 76 | baseline$age0 < 50)]
+```
+
+## Classes d'âge
+```{r}
+sum(is.na(baselineP2$age0))
+```
+
+```{r}
+summary(baselineP2$age0)
+```
+
+
+
+```{r}
+baseline$age0Cut = cut(baseline$age0, quantile(baseline$age0))
+summary(baseline$age0Cut)
+```
+```{r}
+baseline$age0Cut[which(is.na(baseline$age0Cut))] = "(48.5,54.5]"
+```
+
+```{r}
+summary(baseline$age0Cut)
+```
+

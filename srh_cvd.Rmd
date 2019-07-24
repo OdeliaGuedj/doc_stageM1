@@ -1,0 +1,88 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+
+
+
+```{r}
+chisq.test(baselineP5$srhBin, baselineP5$cvd)
+```
+```{r}
+length(which(baseline$cvd == "False"))
+```
+
+
+```{r}
+mean(baselineP1$srhNum[which(baselineP1$cvd == "True")])
+mean(baselineP1$srhNum[which(baselineP1$cvd == "False")])
+```
+
+
+```{r}
+summary(baseline$cvd_score)
+```
+```{r}
+summary(baselineP1$cvd_score)
+```
+```{r}
+df5 = as.data.frame(cbind(rbind(0,1,2,3,4,5),
+                          rbind(round( mean(baselineP1$srhNum[which(baselineP1$cvd_score == 0)])  ,2),
+                                round( mean(baselineP1$srhNum[which(baselineP1$cvd_score == 1)])  ,2),
+                                round( mean(baselineP1$srhNum[which(baselineP1$cvd_score == 2)])  ,2),
+                                round( mean(baselineP1$srhNum[which(baselineP1$cvd_score == 3)])  ,2),
+                                round( mean(baselineP1$srhNum[which(baselineP1$cvd_score == 4)])  ,2),
+                                round( mean(baselineP1$srhNum[which(baselineP1$cvd_score == 5)])  ,2))))
+df5
+```
+```{r}
+ggplot(df5 , aes(x= df5[,1], y= df5[,2])) + geom_point()
+```
+```{r}
+ggplot(baseline , aes(baseline$cvd_score, baseline$age0)) + geom_boxplot()
+```
+```{r}
+ggplot(baseline , aes(baseline$cvd_score, baseline$srhNum)) + geom_boxplot()
+```
+```{r}
+round(prop.table(table(baseline$cvd , baseline$srhBin ) ,2)*100,2)
+round(prop.table(table(baseline$cvd , baseline$srhBin ) ,1)*100,2)
+```
+```{r}
+chisq.test(baseline$cvd, baseline$srhBin)
+```
+```{r}
+reg_log_cvd = glm(baselineP5$srhBin ~ baselineP5$cvd, data = baselineP5, family = "binomial")
+summary(reg_log_cvd)
+odds.ratio(reg_log_cvd)
+```
+```{r}
+reg_log_cvd_score = glm(baselineP5$srhBin ~ as.numeric(baselineP5$cvd_score), data = baselineP5, family = "binomial")
+summary(reg_log_cvd_score)
+odds.ratio(reg_log_cvd_score)
+```
+
+```{r}
+reg_lin_cvd = glm(baselineP5$srhNum ~ baselineP5$cvd, data = baselineP5, family = "gaussian")
+summary(reg_lin_cvd)
+```
+```{r}
+reg_lin_cvd_score = glm(baselineP5$srhNum ~ as.numeric(baselineP5$cvd_score), data = baselineP5, family = "gaussian")
+summary(reg_lin_cvd_score)
+```
+
+
+```{r}
+model5_log = glm(baselineP5$srhBin ~ baselineP5$activpro + baselineP5$sexe + baselineP5$age0Cut + baselineP5$entourage + baselineP5$tabac + baselineP5$cvd, data = baselineP5, family = "binomial")
+summary(model5_log)
+odds.ratio(model5_log)
+```
+
+```{r}
+model5_lin = glm(baselineP5$srhNum ~ baselineP5$activpro + baselineP5$sexe + baselineP5$age0Cut + baselineP5$entourage + baselineP5$tabac + baselineP5$cvd, data = baselineP5, family = "gaussian")
+summary(model5_log)
+confint(model5_log)
+```
+
+

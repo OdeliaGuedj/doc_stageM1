@@ -1,0 +1,93 @@
+---
+title: "Lien activpro et srh"
+output: html_notebook
+---
+
+```{r}
+baseline$activpro = as.factor(baseline$activpro)
+baseline$Qm73 = as.factor(baseline$Qm73)
+```
+
+```{r}
+chisq.test(baseline$activpro, baseline$Qm73)
+```
+```{r}
+summary(baseline$srhBin)
+```
+
+```{r}
+chisq.test(baseline$activpro, baseline$srhBin)
+```
+
+
+```{r}
+tbl <- with(baseline, table(baseline$srhNum, baseline$activpro))
+
+barplot(tbl, beside = TRUE)
+```
+noir à blanc = de 0 à 10
+
+
+
+
+
+```{r}
+baselineP1$activpro = relevel(baselineP1$activpro, ref = "T")
+```
+
+
+```{r}
+reg_log = glm(baselineP1$srhBin ~ baselineP1$activpro, data = baselineP1, family = "binomial")
+summary(reg_log)
+odds.ratio(reg_log)
+```
+
+
+
+
+
+```{r}
+reg_lin = glm(baselineP1$srhNum ~ baselineP1$activpro, data = baselineP1, family = "gaussian")
+summary(reg_lin)
+confint(reg_lin)
+```
+```{r}
+confint(reg_lin)
+```
+
+
+
+```{r}
+anova(reg_log, test = "Chisq")
+```
+
+
+
+```{r}
+chisq.test(baselineP1$Qm73, baselineP1$activpro)$observed
+```
+
+```{r}
+chisq.test(baselineP1$srhBin, baselineP1$activpro)
+
+```
+
+
+```{r}
+a = rbind("T", "R", "C", "I")
+b = rbind(round(mean(baselineP1$srhNum[which(baselineP1$activpro == "T")]),2), 
+          round(mean(baselineP1$srhNum[which(baselineP1$activpro == "R")]),2),
+          round(mean(baselineP1$srhNum[which(baselineP1$activpro == "C")]),2),
+          round(mean(baselineP1$srhNum[which(baselineP1$activpro == "I")]),2))
+
+a
+b
+```
+```{r}
+df1= as.data.frame(cbind(a,b))
+df1
+```
+```{r}
+ggplot(df1, aes(x = a, y = b))+ geom_bar(stat = "identity")
+```
+

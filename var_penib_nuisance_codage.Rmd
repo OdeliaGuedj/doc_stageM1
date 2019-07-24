@@ -1,0 +1,86 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+qm6	exposé nuissances		
+6XXXXX = intempéries
+X5XXXX = poussières
+XX4XXX = produits toxiques
+XXX3XX = vibrations
+XXXX2X = bruit
+XXXXX1 = pas de nuisance(s) particulière(s)
+				
+				
+				
+				
+qm6a	exposé nuissances (2ème ligne de réponses)		
+7 = autres nuisances	
+				
+
+
+```{r}
+baseline$Qm6 = as.factor(baseline$Qm6)
+baseline$Qm6a = as.factor(baseline$Qm6a)
+```
+
+```{r}
+baseline$Qm6[which(baseline$Qm6 == "")] = NA
+baseline$Qm6a[which(baseline$Qm6a == "")] = NA
+```
+
+```{r}
+summary(baseline$Qm6)
+```
+```{r}
+summary(baseline$Qm6a)
+```
+
+```{r}
+baseline$penib_nuisance = 't'
+for(o in 1:(dim(baseline)[1])){
+  if (is.na(baseline$Qm6[o]) | is.na(baseline$Qm6a[o]))
+      baseline$penib_nuisance[o] = NA
+  else if ( baseline$Qm6[o]== "NNNNN1")
+    baseline$penib_nuisance[o] = 0
+  else if (baseline$Qm6[o] == "NNNNNN")
+    baseline$penib_nuisance[o] = NA
+  else
+    baseline$penib_nuisance[o] = 1
+}
+```
+
+```{r}
+baseline$penib_nuisance = as.factor(baseline$penib_nuisance)
+```
+
+```{r}
+summary(baseline$penib_nuisance)
+```
+
+
+```{r}
+
+boxplot(baseline$srhNum ~ baseline$penib_nuisance,names=c("Non Nuisance","Nuisance"),col=c("blue","pink"))
+```
+```{r}
+chisq.test(baseline$Qm73, baseline$penib_nuisance)
+```
+
+```{r}
+hist(baseline$srhNum)
+```
+
+
+```{r}
+summary(baseline$srhNum[which(baseline$penib_nuisance == 0)])
+summary(baseline$srhNum[which(baseline$penib_nuisance == 1)])
+
+```
+
+
+
+
+
+
+

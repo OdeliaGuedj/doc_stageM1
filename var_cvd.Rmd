@@ -1,0 +1,86 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+```{r}
+baseline$Qm34 = as.factor(baseline$Qm34)
+baseline$Qm35 = as.factor(baseline$Qm35)
+baseline$AP_pontage = as.factor(baseline$AP_pontage)
+baseline$Qm37 = as.factor(baseline$Qm37)
+baseline$Qm38 = as.factor(baseline$Qm38)
+baseline$Qm39 = as.factor(baseline$Qm39)
+baseline$Qm40 = as.factor(baseline$Qm40)
+baseline$Qm41 = as.factor(baseline$Qm41)
+```
+
+```{r}
+sum(is.na(baseline$Qm34))
+sum(is.na(baseline$Qm35))
+sum(is.na(baseline$AP_pontage))
+sum(is.na(baseline$Qm37))
+sum(is.na(baseline$Qm38))
+sum(is.na(baseline$Qm39))
+sum(is.na(baseline$Qm40))
+sum(is.na(baseline$Qm41))
+```
+
+```{r}
+chisq.test(baseline$srhBin ,baseline$Qm41)
+```
+
+```{r}
+na_Qm34_id = baseline$nepp3[which(is.na(baseline$Qm34))]
+na_Qm35_id = baseline$nepp3[which(is.na(baseline$Qm35))]
+na_AP_pontage_id = baseline$nepp3[which(is.na(baseline$AP_pontage))]
+na_Qm37_id = baseline$nepp3[which(is.na(baseline$Qm37))]
+na_Qm38_id = baseline$nepp3[which(is.na(baseline$Qm38))]
+na_Qm39_id = baseline$nepp3[which(is.na(baseline$Qm39))]
+na_Qm40_id = baseline$nepp3[which(is.na(baseline$Qm40))]
+na_Qm41_id = baseline$nepp3[which(is.na(baseline$Qm41))]
+```
+
+```{r}
+na_cvd_id = unique(c(na_Qm34_id,na_Qm35_id,na_Qm37_id,na_Qm38_id,na_Qm39_id,na_Qm40_id,na_Qm41_id))
+```
+
+
+```{r}
+for (f in 1:(dim(baseline)[1])){
+  if(is.na(baseline$Qm34[f]) | is.na(baseline$Qm35[f]) | is.na(baseline$Qm37[f]) | is.na(baseline$Qm38[f]) | is.na(baseline$Qm39[f]) | is.na(baseline$Qm40[f]) | is.na(baseline$Qm41[f]))
+    baseline$cvd[f] = NA
+  else if (baseline$Qm34[f] == 1 | baseline$Qm35[f] == 1 | baseline$Qm37[f] == 1 | baseline$Qm38[f] == 1 | baseline$Qm39[f] == 1 | baseline$Qm40[f] == 1 | baseline$Qm41[f] == 1)
+    baseline$cvd[f] = "True"
+  else
+    baseline$cvd[f] = "False"
+}
+```
+
+```{r}
+summary(baseline$cvd)
+```
+```{r}
+summary(baselineP5$cvd)
+```
+
+```{r}
+for (g in 1:(dim(baseline)[1])){
+  if(is.na(baseline$Qm34[g]) | is.na(baseline$Qm35[g]) | is.na(baseline$Qm37[g]) | is.na(baseline$Qm38[g]) | is.na(baseline$Qm39[g]) | is.na(baseline$Qm40[g]) | is.na(baseline$Qm41[g]))
+    baseline$cvd_score[g] = NA
+  else 
+    baseline$cvd_score[g] = (as.numeric(as.character(baseline$Qm34[g])) + as.numeric(as.character(baseline$Qm35[g])) + as.numeric(as.character(baseline$Qm37[g])) + as.numeric(as.character(baseline$Qm38[g])) + as.numeric(as.character(baseline$Qm39[g])) + as.numeric(as.character(baseline$Qm40[g])) + as.numeric(as.character(baseline$Qm41[g])))
+}
+
+```
+```{r}
+summary(baseline$cvd_score)
+```
+
+
+
+
+
+
+
+
+

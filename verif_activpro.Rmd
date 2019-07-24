@@ -1,0 +1,20 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+
+
+```{r}
+summary(baseline$Adm12[which(baseline$Adm12a == "N9NN" & baseline$Adm11 == 5)])
+summary(baseline$Adm10[which(baseline$Adm12a == "N9NN" & baseline$Adm11 == 5 & baseline$Adm12 == "NNNNNN" ) ])
+#summary(baseline$age0[which(baseline$Adm12a == "N9NN" & baseline$Adm11 == 1)])
+```
+
+```{r}
+hist(baseline$age0[baseline$activpro == "R"])
+```
+
+```{r}
+hist(baseline$age0[baseline$activpro == "T"])
+```

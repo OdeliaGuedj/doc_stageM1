@@ -1,0 +1,733 @@
+---
+title: "Codagee variable activpro"
+output: html_notebook
+---
+
+---
+title: "Encodage var"
+output: html_notebook
+---
+
+
+# CODAGE VARIABLE ACTIVPRO
+
+On crée une variable activite dans baseline qui rÃ©sume l'activitÃ© pro en 5 catÃ©gories : 
+  1. travaille
+  2. retraitÃ©
+  3. chomeur
+  4. inactif
+  5. A revoir
+ 
+On regarde toutes les variables qui traitent de la situation pro : Adm12, Adm12a, Adm10 et Adm11. 
+
+adm11	SANS ACTIVITE DEPUIS	
+	    0	en activitÃ©			
+			1	moins d'un an					
+			2	1 an					
+			3	2 ans					
+			4	3 ans ou +					
+			5	jamais travaillÃ©					
+									
+	adm12	ETES-VOUS		
+    6XXXXX = contrat emploi-solidaritÃ©, intÃ©rim, CDD
+    X5XXXX = chomeur depuis + de 6 mois
+    XX4XXX = chomeur depuis - de 6 mois
+    XXX3XX = Ã la recherche d'un emploi
+    XXXX2X = jeune en cours de formation
+    XXXXX1 = ÃÂ©tudiant		
+									
+	adm12a	ETES-VOUS 2EME PARTIE		
+    JXXX = en formation professionnelle
+    X9XX = au foyer
+    XX8X = retraitÃÂ©(e)
+    XXX7 = prÃÂ©-retraitÃÂ©(e)			
+
+```{r}
+baseline$Adm11 = as.factor(baseline$Adm11)
+baseline$Adm12 = as.factor(baseline$Adm12)
+baseline$Adm12a = as.factor(baseline$Adm12a)
+baseline$Adm10 = as.factor(baseline$Adm10)
+```
+
+```{r}
+which(baseline$Adm12 == "")
+which(baseline$Adm12a == "")
+which(baseline$Adm11 == "")
+which(baseline$Adm10 == "")
+```
+```{r}
+baseline$Adm12[which(baseline$Adm12 == "")] = NA
+baseline$Adm12a[which(baseline$Adm12a == "")] = NA
+baseline$Adm11[which(baseline$Adm11 == "")] = NA
+baseline$Adm10[which(baseline$Adm10 == "")] = NA
+```
+```{r}
+which(baseline$Adm12 == "")
+which(baseline$Adm12a == "")
+which(baseline$Adm11 == "")
+which(baseline$Adm10 == "")
+```
+```{r}
+sum(is.na(baseline$Adm12))
+sum(is.na(baseline$Adm12a))
+sum(is.na(baseline$Adm10))
+sum(is.na(baseline$Adm11))
+```
+
+
+Pour crÃ©er la variable on fixe comme variables principales Adm12a et Adm11 puis on "ajuste" avec Adm12 et Adm10
+
+```{r}
+table(baseline$Adm12a, baseline$Adm11, useNA = "ifany")
+```
+```{r}
+cumsum(table(baseline$Adm12a, baseline$Adm11, useNA = "ifany"))
+```
+
+
+```{r}
+print("adm12a")
+summary(baseline$Adm12a)
+print("adm12")
+summary(baseline$Adm12)
+print("adm11")
+summary(baseline$Adm11)
+print("adm10")
+summary(baseline$Adm10)
+```
+
+```{r}
+baseline$activpro = 0
+```
+
+```{r}
+for(i in 1:(dim(baseline)[1])){
+  
+  if(is.na(baseline$Adm12a[i]))
+    baseline$activpro[i] = NA
+
+  else if (baseline$Adm12a[i] == "JNNN" & baseline$Adm11[i] == 0)
+    baseline$activpro[i] = "T"
+  else if (baseline$Adm12a[i] == "JNNN" & baseline$Adm11[i] != 0 & baseline$Adm12[i] == "6NNNNN")
+    baseline$activpro[i] = "T"
+  else if (baseline$Adm12a[i] == "JNNN" & baseline$Adm11[i] != 0 & baseline$Adm12[i] == "NNNNNN")
+    baseline$activpro[i] = "AR"
+
+  else if (baseline$Adm12a[i] == "N98N" & baseline$Adm10[i] == 85 & baseline$Adm12[i] != "NNN3NN")
+    baseline$activpro[i] = "I"
+  else if (baseline$Adm12a[i] == "N98N" & baseline$Adm10[i] == 85 & baseline$Adm12[i] == "NNN3NN")
+    baseline$activpro[i] = "AR"
+  else if (baseline$Adm12a[i] == "N98N" & baseline$Adm10[i] != 85)
+    baseline$activpro[i] = "R"
+
+  else if (baseline$Adm12a[i] == "N9N7")
+    baseline$activpro[i] = "AR"
+  
+  else if (baseline$Adm12a[i] == "N9NN" & baseline$Adm11[i] != 0 & baseline$Adm12[i] == "N5N3NN")
+    baseline$activpro[i] = "C"
+  else if (baseline$Adm12a[i] == "N9NN" & baseline$Adm11[i] != 0 & baseline$Adm12[i] == "N5NNNN")
+    baseline$activpro[i] = "C"
+  else if (baseline$Adm12a[i] == "N9NN" & baseline$Adm11[i] != 0 & baseline$Adm12[i] == "NNN3NN")
+    baseline$activpro[i] = "C"
+  else if (baseline$Adm12a[i] == "N9NN" & baseline$Adm11[i] != 0 & baseline$Adm12[i] == "NNNNNN" & baseline$Adm10[i] %in% c(85,86))
+    baseline$activpro[i] = "I"
+  else if (baseline$Adm12a[i] == "N9NN" & baseline$Adm11[i] != 0 & baseline$Adm12[i] == "NNNNNN" & (baseline$Adm10[i] %in% c(54,74,77) | is.na(baseline$Adm10[i])))
+    baseline$activpro[i] = "AR"
+  else if (baseline$Adm12a[i] == "N9NN" & baseline$Adm11[i] == 0 & baseline$Adm10[i] %in% c(85,86))
+    baseline$activpro[i] = "I"
+  else if (baseline$Adm12a[i] == "N9NN" & baseline$Adm11[i] == 0 & baseline$Adm10[i] == 77)
+    baseline$activpro[i] = "AR"
+
+  else if (baseline$Adm12a[i] == "NN87")
+    baseline$activpro[i] = "AR"
+  
+
+  else if (baseline$Adm12a[i] == "NN8N" & baseline$Adm11[i] == 0 & baseline$Adm12[i]  == "6NNNNN")
+    baseline$activpro[i] = "T"
+  else if (baseline$Adm12a[i] == "NN8N" & baseline$Adm11[i] == 0 & baseline$Adm12[i] == "NNNNNN" & (is.na(baseline$Adm10[i]) | baseline$Adm10[i] == 85))
+    baseline$activpro[i] = "AR"
+  else if (baseline$Adm12a[i] == "NN8N" & baseline$Adm11[i] == 0 & baseline$Adm12[i] == "NNNNNN"& baseline$Adm10[i] %in% c(74,75,77,78))
+    baseline$activpro[i] = "T"
+  else if (baseline$Adm12a[i] == "NN8N" & baseline$Adm11[i] == 0 & baseline$Adm12[i] == "NNNNNN" & baseline$Adm10[i] == 36)
+    baseline$activpro[i] = "T"
+  else if (baseline$Adm12a[i] == "NN8N" & baseline$Adm11[i] == 1 & baseline$Adm12[i] == "NNN3NN")
+    baseline$activpro[i] = "AR"
+  else if (baseline$Adm12a[i] == "NN8N" & baseline$Adm11[i] == 1 & baseline$Adm12[i] == "NNNNNN")
+    baseline$activpro[i] = "R"
+  else if (baseline$Adm12a[i] == "NN8N" & baseline$Adm11[i] == 2 & (baseline$Adm10[i] %in% c(74,75,77,78) | is.na(baseline$Adm10[i])))
+    baseline$activpro[i] = "R"
+  else if (baseline$Adm12a[i] == "NN8N" & baseline$Adm11[i] == 2 & baseline$Adm10[i] == 85)
+    baseline$activpro[i] = "I"
+  else if (baseline$Adm12a[i] == "NN8N" & baseline$Adm11[i] == 3)
+    baseline$activpro[i] = "R"
+  else if (baseline$Adm12a[i] == "NN8N" & baseline$Adm11[i] == 4 & baseline$Adm12[i] != "NNNNNN")
+    baseline$activpro[i] = "AR"
+  else if (baseline$Adm12a[i] == "NN8N" & baseline$Adm11[i] == 4 & baseline$Adm12[i] == "NNNNNN" & (baseline$Adm10[i] %in% c(74,75,77,78) | is.na(baseline$Adm10[i])))
+    baseline$activpro[i] = "R"
+  else if (baseline$Adm12a[i] == "NN8N" & baseline$Adm11[i] == 4 & baseline$Adm12[i] == "NNNNNN" & baseline$Adm10[i] == 85)
+    baseline$activpro[i] = "I"
+  else if (baseline$Adm12a[i] == "NN8N" & baseline$Adm11[i] == 4 & baseline$Adm12[i] == "NNNNNN" & baseline$Adm10[i] %in% c(32,36,95))
+    baseline$activpro[i] = "AR"
+  else if (baseline$Adm12a[i] == "NN8N" & baseline$Adm11[i] == 5 & baseline$Adm10[i] == 85)
+    baseline$activpro[i] = "I"
+  else if (baseline$Adm12a[i] == "NN8N" & baseline$Adm11[i] == 5 & baseline$Adm10[i] == 77)
+    baseline$activpro[i] = "AR"
+
+  else if (baseline$Adm12a[i] == "NNN7" & baseline$Adm11[i] == 0 & baseline$Adm12[i] != "NNNNNN")
+    baseline$activpro[i] = "C"
+  else if (baseline$Adm12a[i] == "NNN7" & baseline$Adm11[i] == 0 & baseline$Adm12[i] == "NNNNNN" & baseline$Adm10[i] %in% c(36,56))
+    baseline$activpro[i] = "T"
+  else if (baseline$Adm12a[i] == "NNN7" & baseline$Adm11[i] == 0 & baseline$Adm12[i] == "NNNNNN" & baseline$Adm10[i] %in% c(85,86,93,95))
+    baseline$activpro[i] = "AR"
+  else if (baseline$Adm12a[i] == "NNN7" & baseline$Adm11[i] == 1 & baseline$Adm12[i] == "N5NNNN")
+    baseline$activpro[i] = "C"
+  else if (baseline$Adm12a[i] == "NNN7" & baseline$Adm11[i] == 1 & baseline$Adm12[i] == "NNNNNN" & baseline$Adm10[i] == 86)
+    baseline$activpro[i] = "I"
+  else if (baseline$Adm12a[i] == "NNN7" & baseline$Adm11[i] == 1 & baseline$Adm12[i] == "NNNNNN" & baseline$Adm10[i] == 77)
+    baseline$activpro[i] = "R"
+  else if (baseline$Adm12a[i] == "NNN7" & baseline$Adm11[i] == 1 & baseline$Adm12[i] == "NNNNNN" & baseline$Adm10[i] %in% c(93,95,96))
+    baseline$activpro[i] = "C"
+  else if (baseline$Adm12a[i] == "NNN7" & baseline$Adm11[i] == 2 & baseline$Adm12[i] == "N5NNNN")
+    baseline$activpro[i] = "C"
+  else if (baseline$Adm12a[i] == "NNN7" & baseline$Adm11[i] == 2 & baseline$Adm12[i] == "NNNNNN" & baseline$Adm10[i] %in% c(93,95,96))
+    baseline$activpro[i] = "C"
+  else if (baseline$Adm12a[i] == "NNN7" & baseline$Adm11[i] == 2 & baseline$Adm12[i] == "NNNNNN" & baseline$Adm10[i] == 86)
+    baseline$activpro[i] = "I"
+  else if (baseline$Adm12a[i] == "NNN7" & baseline$Adm11[i] == 2 & baseline$Adm12[i] == "NNNNNN" & baseline$Adm10[i] == 74)
+    baseline$activpro[i] = "R"
+  else if (baseline$Adm12a[i] == "NNN7" & baseline$Adm11[i] == 3 & baseline$Adm12[i] == "N5NNNN")
+    baseline$activpro[i] = "C"
+  else if (baseline$Adm12a[i] == "NNN7" & baseline$Adm11[i] == 3 & baseline$Adm12[i] == "NNNNNN" & baseline$Adm10[i] %in% c(95,96))
+    baseline$activpro[i] = "C"
+  else if (baseline$Adm12a[i] == "NNN7" & baseline$Adm11[i] == 3 & baseline$Adm12[i] == "NNNNNN" & baseline$Adm10[i] == 86)
+    baseline$activpro[i] = "I"
+  else if (baseline$Adm12a[i] == "NNN7" & baseline$Adm11[i] == 3 & baseline$Adm12[i] == "NNNNNN" & baseline$Adm10[i] == 77)
+    baseline$activpro[i] = "R"
+  else if (baseline$Adm12a[i] == "NNN7" & baseline$Adm11[i] == 4 & baseline$Adm12[i] == "N5NNNN")
+    baseline$activpro[i] = "C"
+  else if (baseline$Adm12a[i] == "NNN7" & baseline$Adm11[i] == 4 & baseline$Adm12[i] == "NNNNNN" & baseline$Adm10[i] == 54)
+    baseline$activpro[i] = "AR"
+  else if (baseline$Adm12a[i] == "NNN7" & baseline$Adm11[i] == 4 & baseline$Adm12[i] == "NNNNNN" & baseline$Adm10[i] %in% c(85,86))
+    baseline$activpro[i] = "I"
+  else if (baseline$Adm12a[i] == "NNN7" & baseline$Adm11[i] == 4 & baseline$Adm12[i] == "NNNNNN" & baseline$Adm10[i] %in% c(93,95,96))
+    baseline$activpro[i] = "C"
+
+  else if (baseline$Adm12a[i] == "NNNN" & baseline$Adm11[i] == 0 & baseline$Adm12[i] == "NNNNNN" & baseline$Adm10[i] %in% c(31,32,34,36,37,41,46,47,48,51,53,54,55,56,61,66))
+    baseline$activpro[i] = "T"
+  else if (baseline$Adm12a[i] == "NNNN" & baseline$Adm11[i] == 0 & baseline$Adm12[i] == "NNNNNN" & baseline$Adm10[i] %in% c(74,77))
+    baseline$activpro[i] = "R"
+  else if (baseline$Adm12a[i] == "NNNN" & baseline$Adm11[i] == 0 & baseline$Adm12[i] == "NNNNNN" & baseline$Adm10[i] %in% c(85,86))
+    baseline$activpro[i] = "I"
+  else if (baseline$Adm12a[i] == "NNNN" & baseline$Adm11[i] == 0 & baseline$Adm12[i] == "NNNNNN" & is.na(baseline$Adm10[i]))
+    baseline$activpro[i] = "T"
+  else if (baseline$Adm12a[i] == "NNNN" & baseline$Adm11[i] == 0 & baseline$Adm12[i] == "NNNNNN" & baseline$Adm10[i] == 88)
+    baseline$activpro[i] = "AR"
+  else if (baseline$Adm12a[i] == "NNNN" & baseline$Adm11[i] == 0 & baseline$Adm12[i] == "NNNNNN" & baseline$Adm10[i] %in% c(95,96))
+    baseline$activpro[i] = "C"
+  else if (baseline$Adm12a[i] == "NNNN" & baseline$Adm11[i] == 0 & baseline$Adm12[i] == "NNN3NN" & baseline$Adm10[i] == 48)
+    baseline$activpro[i] = "AR"
+  else if (baseline$Adm12a[i] == "NNNN" & baseline$Adm11[i] == 0 & baseline$Adm12[i] == "NNN3NN" & baseline$Adm10[i] != 48)
+    baseline$activpro[i] = "C"
+  else if (baseline$Adm12a[i] == "NNNN" & baseline$Adm11[i] == 0 & baseline$Adm12[i] %in% c("NN4NNN", "NN43NN" , "N5NNNN", "N5N3NN"))
+    baseline$activpro[i] = "C"
+  else if (baseline$Adm12a[i] == "NNNN" & baseline$Adm11[i] == 0 & baseline$Adm12[i] %in% c("6NNNNN", "6NN3NN", "6N43NN", "65NNNN", "65N3NN"))
+    baseline$activpro[i] = "T"
+  else if (baseline$Adm12a[i] == "NNNN" & baseline$Adm11[i] == 1 & baseline$Adm12[i] == "NNNNNN" & baseline$Adm10[i] %in% c(54,95,96))
+    baseline$activpro[i] = "C"
+  else if (baseline$Adm12a[i] == "NNNN" & baseline$Adm11[i] == 1 & baseline$Adm12[i] == "NNNNNN" & baseline$Adm10[i] == 86)
+    baseline$activpro[i] = "I"
+  else if (baseline$Adm12a[i] == "NNNN" & baseline$Adm11[i] == 1 & baseline$Adm12[i] %in% c("NNN3NN", "NN4NNN", "NN43NN", "N5NNNN", "N5N3NN", "N543NN"))
+    baseline$activpro[i] = "C"
+  else if (baseline$Adm12a[i] == "NNNN" & baseline$Adm11[i] == 1 & baseline$Adm12[i] %in% c("6NNNNN", "6NN3NN", "6N4NNN", "6N43NN", "65NNNN", "65N3NN"))
+    baseline$activpro[i] = "C"
+  else if (baseline$Adm12a[i] == "NNNN" & baseline$Adm11[i] == 2 & baseline$Adm12[i] == "NNNNNN" & baseline$Adm10[i] %in% c(95,96))
+    baseline$activpro[i] = "C"
+  else if (baseline$Adm12a[i] == "NNNN" & baseline$Adm11[i] == 2 & baseline$Adm12[i] == "NNNNNN" & baseline$Adm10[i] == 86)
+    baseline$activpro[i] = "I"
+  else if (baseline$Adm12a[i] == "NNNN" & baseline$Adm11[i] == 2 & baseline$Adm12[i] %in% c("NNN3NN", "N5NNNN", "N5N3NN"))
+    baseline$activpro[i] = "C"
+  else if (baseline$Adm12a[i] == "NNNN" & baseline$Adm11[i] == 2 & baseline$Adm12[i] == "6NN3NN")
+    baseline$activpro[i] = "T"
+  else if (baseline$Adm12a[i] == "NNNN" & baseline$Adm11[i] == 3 & baseline$Adm12[i] == "NNNNNN" & baseline$Adm10[i] == 56)
+    baseline$activpro[i] = "AR"
+  else if (baseline$Adm12a[i] == "NNNN" & baseline$Adm11[i] == 3 & baseline$Adm12[i] == "NNNNNN" & baseline$Adm10[i] != 56)
+    baseline$activpro[i] = "C"
+  else if (baseline$Adm12a[i] == "NNNN" & baseline$Adm11[i] == 3 & baseline$Adm12[i] %in% c("NNN3NN", "N5NNNN", "N5N3NN"))
+    baseline$activpro[i] = "C"
+  else if (baseline$Adm12a[i] == "NNNN" & baseline$Adm11[i] == 3 & baseline$Adm12[i] %in% c("65NNNN", "6NNNNN"))
+    baseline$activpro[i] = "T"
+  
+  else if (baseline$Adm12a[i] == "NNNN" & baseline$Adm11[i] == 4 & baseline$Adm12[i] == "NNNNNN" & baseline$Adm10[i] %in% c(77,74))
+    baseline$activpro[i] = "R"
+  else if (baseline$Adm12a[i] == "NNNN" & baseline$Adm11[i] == 4 & baseline$Adm12[i] == "NNNNNN" & baseline$Adm10[i] %in% c(95,96))
+    baseline$activpro[i] = "C"
+  else if (baseline$Adm12a[i] == "NNNN" & baseline$Adm11[i] == 4 & baseline$Adm12[i] == "NNNNNN" & baseline$Adm10[i] %in% c(85,86))
+    baseline$activpro[i] = "I"
+  else if (baseline$Adm12a[i] == "NNNN" & baseline$Adm11[i] == 4 & baseline$Adm12[i] == "NNNNNN" & baseline$Adm10[i] %in% c(55,54,51,48,47,36,32))
+    baseline$activpro[i] = "AR"
+  else if (baseline$Adm12a[i] == "NNNN" & baseline$Adm11[i] == 4 & baseline$Adm12[i] == "NN4NNN")
+    baseline$activpro[i] = "C"
+  else if (baseline$Adm12a[i] == "NNNN" & baseline$Adm11[i] == 4 & baseline$Adm12[i] == "NNN3NN" & baseline$Adm10[i] == 85)
+    baseline$activpro[i] = "AR"
+  else if (baseline$Adm12a[i] == "NNNN" & baseline$Adm11[i] == 4 & baseline$Adm12[i] == "NNN3NN" & baseline$Adm10[i] != 85)
+    baseline$activpro[i] = "C"
+  else if (baseline$Adm12a[i] == "NNNN" & baseline$Adm11[i] == 4 & baseline$Adm12[i] == "NN4NNN")
+    baseline$activpro[i] = "C"
+  else if (baseline$Adm12a[i] == "NNNN" & baseline$Adm11[i] == 4 & baseline$Adm12[i] == "NN43NN") ## !!
+    baseline$activpro[i] = "C"
+  else if (baseline$Adm12a[i] == "NNNN" & baseline$Adm11[i] == 4 & baseline$Adm12[i] == "N5NNNN" & baseline$Adm10[i] == 86)
+    baseline$activpro[i] = "I"
+  else if (baseline$Adm12a[i] == "NNNN" & baseline$Adm11[i] == 4 & baseline$Adm12[i] == "N5NNNN" & baseline$Adm10[i] != 86)
+    baseline$activpro[i] = "C"
+  else if (baseline$Adm12a[i] == "NNNN" & baseline$Adm11[i] == 4 & baseline$Adm12[i] == "N5N3NN")
+    baseline$activpro[i] = "C"
+  else if (baseline$Adm12a[i] == "NNNN" & baseline$Adm11[i] == 4 & baseline$Adm12[i] %in% c("6NNNNN" , "65NNNN"))
+    baseline$activpro[i] = "T"
+  else if (baseline$Adm12a[i] == "NNNN" & baseline$Adm11[i] == 5 & baseline$Adm12[i] %in% c("N5NNNN", "N5N3NN"))
+    baseline$activpro[i] = "C"
+  
+}
+```
+
+
+ Avant la rÃ©duction du nombre d'AR:
+ 
+  AR    C    I    R    T 
+  73  819  402 3155 5692 
+  
+  
+Essayons de réduire le nombre de AR
+
+```{r}
+table(baseline$Adm12a[which(baseline$activpro == "AR")], baseline$Adm11[which(baseline$activpro == "AR")])
+```
+```{r}
+baseline$Adm12[which(baseline$activpro == "AR" & baseline$Adm12a == "NNNN" & baseline$Adm11 == 4)]
+```
+```{r}
+length(which(baseline$activpro == "AR" & baseline$Adm12a == "NNNN" & baseline$Adm11 == 4 & baseline$Adm12 == "NNNNNN"))
+```
+```{r}
+baseline$age0[which(baseline$activpro == "AR" & baseline$Adm12a == "NNNN" & baseline$Adm11 == 4 & baseline$Adm12 == "NNNNNN")]
+```
+```{r}
+baseline$Adm10[which(baseline$activpro == "AR" & baseline$Adm12a == "NNNN" & baseline$Adm11 == 4 & baseline$Adm12 == "NNNNNN")]
+```
+
+Pour rÃ©sumer ces 16 personnes n'ont pas travaillÃ© depuis 3 ans ou plus n'ont rien cochÃ© pour Adm12 et Adm12a ont un code prof qui n'indique ni la retraite ni un eventuel chomage.
+Ils ont majoritairement moins de 60 ans.
+Ces personnnes semblent inclassables.
+
+```{r}
+baseline$activpro[which(baseline$activpro == "AR" & baseline$Adm12a == "NNNN" & baseline$Adm11 == 4 & baseline$Adm12 == "NNNNNN")] = "NSP"
+```
+
+```{r}
+table(baseline$activpro)
+```
+```{r}
+table(baseline$Adm12a[which(baseline$activpro == "AR")], baseline$Adm11[which(baseline$activpro == "AR")])
+```
+```{r}
+baseline$Adm12[which(baseline$activpro == "AR" & baseline$Adm12a == "NNNN" & baseline$Adm11 == 4)]
+baseline$Adm10[which(baseline$activpro == "AR" & baseline$Adm12a == "NNNN" & baseline$Adm11 == 4)]
+```
+Il est sans activitÃ© pro mais pas au foyer(86), demandeur d'emplois, ne travaille pas de puis plus de trois ans et n'a rien cochÃ© pour Adm12a.
+Donc ni retraitÃ© ni inactif.
+```{r}
+baseline$age0[which(baseline$activpro == "AR" & baseline$Adm12a == "NNNN" & baseline$Adm11 == 4)]
+```
+On peux le classer en chomeur
+
+```{r}
+baseline$activpro[which(baseline$activpro == "AR" & baseline$Adm12a == "NNNN" & baseline$Adm11 == 4)] = "C"
+```
+
+```{r}
+table(baseline$activpro)
+```
+```{r}
+table(baseline$Adm12a[which(baseline$activpro == "AR")], baseline$Adm11[which(baseline$activpro == "AR")])
+```
+```{r}
+baseline$Adm12[which(baseline$activpro == "AR" & baseline$Adm12a == "NNNN" & baseline$Adm11 == 3)]
+baseline$Adm10[which(baseline$activpro == "AR" & baseline$Adm12a == "NNNN" & baseline$Adm11 == 3)]
+
+```
+```{r}
+baseline$activpro[which(baseline$activpro == "AR" & baseline$Adm12a == "NNNN" & baseline$Adm11 == 3)] = "NSP"
+```
+```{r}
+table(baseline$activpro)
+```
+```{r}
+table(baseline$Adm12a[which(baseline$activpro == "AR")], baseline$Adm11[which(baseline$activpro == "AR")])
+```
+```{r}
+baseline$Adm12[which(baseline$activpro == "AR" & baseline$Adm12a == "NNNN" & baseline$Adm11 == 0)] 
+baseline$Adm10[which(baseline$activpro == "AR" & baseline$Adm12a == "NNNN" & baseline$Adm11 == 0)] 
+```
+```{r}
+baseline$activpro[which(baseline$activpro == "AR" & baseline$Adm12a == "NNNN" & baseline$Adm11 == 0 & baseline$Adm10 == 88)] = "NSP"
+baseline$activpro[which(baseline$activpro == "AR" & baseline$Adm12a == "NNNN" & baseline$Adm11 == 0 & baseline$Adm10 == 48)] = "T"
+
+```
+
+```{r}
+table(baseline$activpro)
+```
+
+
+```{r}
+baseline$Adm12[which(baseline$activpro == "AR" & baseline$Adm12a == "NNN7" & baseline$Adm11 == 0)]
+baseline$Adm10[which(baseline$activpro == "AR" & baseline$Adm12a == "NNN7" & baseline$Adm11 == 0)]
+```
+
+
+```{r}
+baseline$activpro[which(baseline$activpro == "AR" & baseline$Adm12a == "NNN7" &  baseline$Adm11 == 0 & baseline$Adm10 %in% c(85,86))] = "NSP"
+baseline$activpro[which(baseline$activpro == "AR" & baseline$Adm12a == "NNN7" &  baseline$Adm11 == 0 & baseline$Adm10 %in% c(93,95))] = "C"
+```
+
+
+
+```{r}
+table(baseline$activpro)
+```
+```{r}
+table(baseline$Adm12a[which(baseline$activpro == "AR")], baseline$Adm11[which(baseline$activpro == "AR")])
+```
+
+
+
+```{r}
+baseline$Adm12[which(baseline$activpro == "AR" & baseline$Adm12a == "NNN7" & baseline$Adm11 == 4)]
+baseline$Adm10[which(baseline$activpro == "AR" & baseline$Adm12a == "NNN7" & baseline$Adm11 == 4)]
+
+```
+```{r}
+baseline$activpro[which(baseline$activpro == "AR" & baseline$Adm12a == "NNN7" & baseline$Adm11 == 4)] = "NSP"
+```
+```{r}
+table(baseline$activpro)
+```
+
+
+```{r}
+table(baseline$Adm12a[which(baseline$activpro == "AR")], baseline$Adm11[which(baseline$activpro == "AR")])
+```
+```{r}
+baseline$Adm12[which(baseline$activpro == "AR" & baseline$Adm12a == "NN8N" & baseline$Adm11 == 5)]
+baseline$Adm10[which(baseline$activpro == "AR" & baseline$Adm12a == "NN8N" & baseline$Adm11 == 5)]
+```
+```{r}
+baseline$activpro[which(baseline$activpro == "AR" & baseline$Adm12a == "NN8N" & baseline$Adm11 == 5)] = "NSP"
+```
+```{r}
+table(baseline$activpro)
+```
+```{r}
+table(baseline$Adm12a[which(baseline$activpro == "AR")], baseline$Adm11[which(baseline$activpro == "AR")])
+```
+
+```{r}
+baseline$Adm12[which(baseline$activpro == "AR" & baseline$Adm12a == "NN8N" & baseline$Adm11 == 4)]
+baseline$Adm10[which(baseline$activpro == "AR" & baseline$Adm12a == "NN8N" & baseline$Adm11 == 4)]
+```
+```{r}
+baseline$Adm12[which(baseline$activpro == "AR" & baseline$Adm12a == "NN8N" & baseline$Adm11 == 4 & baseline$Adm12 == "NNNNNN")]
+baseline$Adm10[which(baseline$activpro == "AR" & baseline$Adm12a == "NN8N" & baseline$Adm11 == 4 & baseline$Adm12 == "NNNNNN")]
+```
+```{r}
+baseline$activpro[which(baseline$activpro == "AR" & baseline$Adm12a == "NN8N" & baseline$Adm11 == 4 & baseline$Adm12 == "NNNNNN" & baseline$Adm10 %in% c(32,36))] = "NSP"
+baseline$activpro[which(baseline$activpro == "AR" & baseline$Adm12a == "NN8N" & baseline$Adm11 == 4 & baseline$Adm12 == "NNNNNN" & baseline$Adm10 == 95)] = "NSP"
+```
+
+```{r}
+baseline$Adm12[which(baseline$activpro == "AR" & baseline$Adm12a == "NN8N" & baseline$Adm11 == 4 & baseline$Adm12 == "NNN3NN")]
+baseline$Adm10[which(baseline$activpro == "AR" & baseline$Adm12a == "NN8N" & baseline$Adm11 == 4 & baseline$Adm12 == "NNN3NN")]
+```
+```{r}
+baseline$activpro[which(baseline$activpro == "AR" & baseline$Adm12a == "NN8N" & baseline$Adm11 == 4 & baseline$Adm12 == "NNN3NN")] = "NSP"
+```
+
+```{r}
+baseline$Adm12[which(baseline$activpro == "AR" & baseline$Adm12a == "NN8N" & baseline$Adm11 == 4 & baseline$Adm12 == "6NNNNN")]
+baseline$Adm10[which(baseline$activpro == "AR" & baseline$Adm12a == "NN8N" & baseline$Adm11 == 4 & baseline$Adm12 == "6NNNNN")]
+```
+```{r}
+baseline$activpro[which(baseline$activpro == "AR" & baseline$Adm12a == "NN8N" & baseline$Adm11 == 4 & baseline$Adm12 == "6NNNNN")] = "NSP"
+```
+```{r}
+baseline$Adm12[which(baseline$activpro == "AR" & baseline$Adm12a == "NN8N" & baseline$Adm11 == 4 & baseline$Adm12 == "N5NNNN")]
+baseline$Adm10[which(baseline$activpro == "AR" & baseline$Adm12a == "NN8N" & baseline$Adm11 == 4 & baseline$Adm12 == "N5NNNN")]
+```
+```{r}
+baseline$activpro[which(baseline$activpro == "AR" & baseline$Adm12a == "NN8N" & baseline$Adm11 == 4 & baseline$Adm12 == "N5NNNN")] = "NSP"
+```
+
+```{r}
+table(baseline$activpro)
+```
+```{r}
+table(baseline$Adm12a[which(baseline$activpro == "AR")], baseline$Adm11[which(baseline$activpro == "AR")])
+```
+```{r}
+baseline$Adm12[which(baseline$activpro == "AR" & baseline$Adm12a == "NN8N" & baseline$Adm11 == 1)]
+baseline$Adm10[which(baseline$activpro == "AR" & baseline$Adm12a == "NN8N" & baseline$Adm11 == 1)]
+```
+```{r}
+baseline$activpro[which(baseline$activpro == "AR" & baseline$Adm12a == "NN8N" & baseline$Adm11 == 1)] = "NSP"
+```
+
+```{r}
+table(baseline$activpro)
+```
+```{r}
+table(baseline$Adm12a[which(baseline$activpro == "AR")], baseline$Adm11[which(baseline$activpro == "AR")])
+```
+
+```{r}
+baseline$Adm12[which(baseline$activpro == "AR" & baseline$Adm12a == "NN8N" & baseline$Adm11 == 0)]
+baseline$Adm10[which(baseline$activpro == "AR" & baseline$Adm12a == "NN8N" & baseline$Adm11 == 0)]
+```
+```{r}
+baseline$activpro[which(baseline$activpro == "AR" & baseline$Adm12a == "NN8N" & baseline$Adm11 == 0)] = "NSP"
+```
+
+```{r}
+table(baseline$activpro)
+```
+```{r}
+table(baseline$Adm12a[which(baseline$activpro == "AR")], baseline$Adm11[which(baseline$activpro == "AR")])
+```
+```{r}
+baseline$Adm12[which(baseline$activpro == "AR" & baseline$Adm12a == "NN87" & baseline$Adm11 == 0)]
+baseline$Adm10[which(baseline$activpro == "AR" & baseline$Adm12a == "NN87" & baseline$Adm11 == 0)]
+
+```
+```{r}
+baseline$activpro[which(baseline$activpro == "AR" & baseline$Adm12a == "NN87" & baseline$Adm11 == 0)] = "NSP"
+```
+```{r}
+table(baseline$activpro)
+```
+```{r}
+table(baseline$Adm12a[which(baseline$activpro == "AR")], baseline$Adm11[which(baseline$activpro == "AR")])
+```
+```{r}
+baseline$Adm12[which(baseline$activpro == "AR" & baseline$Adm12a == "NN87" & baseline$Adm11 == 3)]
+baseline$Adm10[which(baseline$activpro == "AR" & baseline$Adm12a == "NN87" & baseline$Adm11 == 3)]
+
+```
+
+```{r}
+baseline$activpro[which(baseline$activpro == "AR" & baseline$Adm12a == "NN87" & baseline$Adm11 == 3)] = "R"
+
+```
+```{r}
+table(baseline$activpro)
+```
+```{r}
+table(baseline$Adm12a[which(baseline$activpro == "AR")], baseline$Adm11[which(baseline$activpro == "AR")])
+```
+```{r}
+baseline$Adm12[which(baseline$activpro == "AR" & baseline$Adm12a == "N9NN" & baseline$Adm11 == 4)]
+baseline$Adm10[which(baseline$activpro == "AR" & baseline$Adm12a == "N9NN" & baseline$Adm11 == 4)]
+
+```
+```{r}
+baseline$activpro[which(baseline$Adm12a == "N9NN" & baseline$Adm11 == 4 & baseline$Adm10 %in% c(77,74))] = "I"
+baseline$activpro[which(baseline$Adm12a == "N9NN" & baseline$Adm11 == 4 & baseline$Adm10 == 54 )] = "NSP"
+baseline$activpro[which(baseline$Adm12a == "N9NN" & baseline$Adm11 == 4 & is.na(baseline$Adm10))] = "I"
+```
+
+```{r}
+table(baseline$activpro)
+```
+```{r}
+table(baseline$Adm12a[which(baseline$activpro == "AR")], baseline$Adm11[which(baseline$activpro == "AR")])
+```
+```{r}
+baseline$Adm12[which(baseline$activpro == "AR" & baseline$Adm12a == "N9NN" & baseline$Adm11 == 0)]
+baseline$Adm10[which(baseline$activpro == "AR" & baseline$Adm12a == "N9NN" & baseline$Adm11 == 0)]
+
+```
+
+
+```{r}
+baseline$activpro[which(baseline$activpro == "AR" & baseline$Adm12a == "N9NN" & baseline$Adm11 == 0)] = "NSP"
+
+```
+
+
+```{r}
+table(baseline$activpro)
+```
+```{r}
+table(baseline$Adm12a[which(baseline$activpro == "AR")], baseline$Adm11[which(baseline$activpro == "AR")])
+```
+
+```{r}
+baseline$Adm12[which(baseline$activpro == "AR" & baseline$Adm12a == "N9N7" & baseline$Adm11 == 4)]
+baseline$Adm10[which(baseline$activpro == "AR" & baseline$Adm12a == "N9N7" & baseline$Adm11 == 4)]
+
+```
+
+```{r}
+
+baseline$activpro[which(baseline$activpro == "AR" & baseline$Adm12a == "N9N7" & baseline$Adm11 == 4)] = "NSP"
+
+```
+
+
+```{r}
+table(baseline$activpro)
+```
+```{r}
+table(baseline$Adm12a[which(baseline$activpro == "AR")], baseline$Adm11[which(baseline$activpro == "AR")])
+```
+```{r}
+baseline$Adm12[which(baseline$activpro == "AR" & baseline$Adm12a == "N9N7" & baseline$Adm11 == 3)]
+baseline$Adm10[which(baseline$activpro == "AR" & baseline$Adm12a == "N9N7" & baseline$Adm11 == 3)]
+
+```
+
+```{r}
+baseline$activpro[which(baseline$activpro == "AR" & baseline$Adm12a == "N9N7" & baseline$Adm11 == 3)] = "NSP"
+```
+```{r}
+table(baseline$activpro)
+```
+```{r}
+table(baseline$Adm12a[which(baseline$activpro == "AR")], baseline$Adm11[which(baseline$activpro == "AR")])
+```
+```{r}
+baseline$Adm12[which(baseline$activpro == "AR" & baseline$Adm12a == "N9N7" & baseline$Adm11 == 1)]
+baseline$Adm10[which(baseline$activpro == "AR" & baseline$Adm12a == "N9N7" & baseline$Adm11 == 1)]
+
+```
+```{r}
+baseline$activpro[which(baseline$activpro == "AR" & baseline$Adm12a == "N9N7" & baseline$Adm11 == 1)] = "NSP"
+```
+
+```{r}
+table(baseline$activpro)
+```
+```{r}
+table(baseline$Adm12a[which(baseline$activpro == "AR")], baseline$Adm11[which(baseline$activpro == "AR")])
+```
+
+```{r}
+baseline$Adm12[which(baseline$activpro == "AR" & baseline$Adm12a == "N98N" & baseline$Adm11 == 4)]
+baseline$Adm10[which(baseline$activpro == "AR" & baseline$Adm12a == "N98N" & baseline$Adm11 == 4)]
+```
+```{r}
+baseline$activpro[which(baseline$activpro == "AR" & baseline$Adm12a == "N98N" & baseline$Adm11 == 4)] = "NSP"
+```
+```{r}
+table(baseline$activpro)
+```
+```{r}
+table(baseline$Adm12a[which(baseline$activpro == "AR")], baseline$Adm11[which(baseline$activpro == "AR")])
+```
+
+```{r}
+baseline$Adm12[which(baseline$activpro == "AR" & baseline$Adm12a == "JNNN" & baseline$Adm11 == 4)]
+baseline$Adm10[which(baseline$activpro == "AR" & baseline$Adm12a == "JNNN" & baseline$Adm11 == 4)]
+```
+```{r}
+baseline$activpro[which(baseline$activpro == "AR" & baseline$Adm12a == "JNNN" & baseline$Adm11 == 4)] = "NSP"
+```
+
+```{r}
+table(baseline$activpro)
+```
+```{r}
+table(baseline$Adm12a[which(baseline$activpro == "AR")], baseline$Adm11[which(baseline$activpro == "AR")])
+```
+
+# COHERANCE DES CLASSES
+
+```{r}
+table(baseline$activpro)
+```
+## Les retraités
+
+```{r}
+summary(baseline$age0[which(baseline$activpro == 'R')])
+```
+```{r}
+length(which(baseline$age0[which(baseline$activpro == 'R') ]< 60))
+```
+```{r}
+length(which(baseline$age0[which(baseline$activpro == 'R') ]< 58))
+```
+```{r}
+length(which(baseline$age0[which(baseline$activpro == 'R') ]< 56))
+```
+```{r}
+hist(baseline$age0[which(baseline$activpro == 'R')])
+```
+## Travailleurs
+
+```{r}
+summary(baseline$age0[which(baseline$activpro == 'T')])
+```
+```{r}
+length(which(baseline$age0[which(baseline$activpro == 'T')] > 65))
+```
+```{r}
+length(which(baseline$age0[which(baseline$activpro == 'T')] > 70))
+```
+```{r}
+length(which(baseline$age0[which(baseline$activpro == 'T')] > 72))
+```
+```{r}
+hist(baseline$age0[which(baseline$activpro == 'T')])
+```
+## Chômeurs
+
+
+
+```{r}
+summary(baseline$age0[which(baseline$activpro == 'C')])
+```
+
+```{r}
+hist(baseline$age0[which(baseline$activpro == 'C')])
+```
+
+## INACTIFS
+
+```{r}
+summary(baseline$age0[which(baseline$activpro == 'I')])
+
+```
+
+```{r}
+hist(baseline$age0[which(baseline$activpro == 'I')])
+```
+
+# FINAL TOUCH
+
+```{r}
+baseline$activpro = as.factor(baseline$activpro)
+baseline$activpro = relevel(baseline$activpro , ref = "T")
+
+```
+
+# Gestion des NA
+```{r}
+summary(baseline$activpro)
+```
+```{r}
+baseline$activpro[which(baseline$activpro == "NSP")] = NA
+```
+```{r}
+summary(baseline$activpro)
+```
+```{r}
+na_activpro_id = baseline$nepp3[which(is.na(baseline$activpro))]
+```
+

@@ -1,0 +1,109 @@
+---
+title: "Codage Variable penibilité horraires"
+output: html_notebook
+---
+
+
+qm5	horaires travail		
+6XXXXX = sans horaire fixe
+X5XXXX = partiel ou mi-temps
+XX4XXX = nuit
+XXX3XX = posté (2*8, 3*8)
+XXXX2X = journée continue
+XXXXX1 = journée normale"				
+									
+									
+									
+									
+									
+qm5a	horaires travail (2ème ligne de réponses)	
+7 = occasionnel	Questionnaire médical				
+									
+```{r}
+baseline$Qm5 = as.factor(baseline$Qm5)
+baseline$Qm5a = as.factor(baseline$Qm5a)
+```
+
+```{r}
+levels(baseline$Qm5)
+levels(baseline$Qm5a)
+```
+
+```{r}
+length(which(baseline$Qm5 == ""))
+length(which(baseline$Qm5a == ""))
+```
+
+```{r}
+baseline$Qm5[which(baseline$Qm5 == "")] = NA
+baseline$Qm5a[which(baseline$Qm5a == "")] = NA
+```
+
+```{r}
+which(baseline$Qm5 == "")
+which(baseline$Qm5a == "")
+```
+```{r}
+sum(is.na(baseline$Qm5))
+sum(is.na(baseline$Qm5a))
+```
+
+```{r}
+tab1 = table(baseline$Qm5, useNA = "ifany")
+write.csv2(tab1,'W:/Odélia/srh_retraite/data/tab1.csV')
+```
+
+```{r}
+tab1
+```
+
+```{r}
+length(which(is.na(baseline$Qm5) & is.na(baseline$Qm5a)))
+```
+
+
+```{r}
+baseline$penib_hor = "v"
+for(m in 1:(dim(baseline)[1])){
+  if(is.na(baseline$Qm5[m]))
+    baseline$penib_hor[m] = NA
+  else if (baseline$Qm5[m] == "NNNNNN" )
+    baseline$penib_hor[m] = NA 
+  else if (baseline$Qm5[m] %in% c("NN4321","NN432N","NN43N1","NN43NN","NN4N21","NN4N2N","NN4NN1","NN4NNN","NNN32N","NNN3N1","NNN3NN","N54N2N","N54NN1","N54NNN","6N4321","6N43NN","6N4N21","6N4N2N","6N4NN1","6N4NNN","6NN32N","6NN3NN","654NN1","654NNN"))
+    baseline$penib_hor[m] = 1
+  else
+    baseline$penib_hor[m] = 0
+}
+
+```
+
+```{r}
+baseline$penib_hor = as.factor(baseline$penib_hor)
+```
+
+```{r}
+summary(baseline$penib_hor)
+```
+```{r}
+summary(baseline$Adm10[which(is.na(baseline$penib_hor))])
+```
+
+```{r}
+baseline$penib_hor[which(is.na(baseline$penib_hor) & baseline$Adm10 %in% c(96,95,94,93,86,85,78,77,75,74))] = 0
+```
+```{r}
+summary(baseline$penib_hor)
+```
+```{r}
+boxplot(baseline$srhNum ~ baseline$penib_hor,col=c("blue","pink"))
+```
+
+```{r}
+boxplot(baseline$srhNum ~ baseline$Qm4a)
+
+```
+```{r}
+boxplot(baseline$srhNum ~ baseline$Qm4)
+
+```
+

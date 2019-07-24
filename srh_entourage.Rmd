@@ -1,0 +1,75 @@
+---
+title: "Lien srh et entourage"
+output: html_notebook
+---
+
+```{r}
+summary(baselineP3$entourage)
+round(prop.table(summary(baselineP3$entourage))*100,2)
+```
+
+
+
+```{r}
+chisq.test(baselineP3$srhBin, baselineP3$entourage)
+```
+```{r}
+ggplot(baselineP3, aes(x = baselineP3$entourage , y = baselineP3$srhNum)) + geom_boxplot()
+```
+```{r}
+c = rbind("seul", "couple", "famille")
+d = rbind(round(mean(baselineP3$srhNum[which(baselineP3$entourage == "seul")]),2),
+round(mean(baselineP3$srhNum[which(baselineP3$entourage == "couple")]),2),
+round(mean(baselineP3$srhNum[which(baselineP3$entourage == "famille")]),2))
+d
+df2 = as.data.frame(cbind(c,d))
+df2
+```
+```{r}
+ggplot(df2, aes(c,d)) + geom_point() + ggtitle("Moyenne de santé perçue chez les sujets vivant seul, en couple ou bien en famille")
+```
+
+
+```{r}
+library(ggplot2)
+ggplot(baselineP3, aes(x = baselineP3$entourage , y = baselineP3$srhNum, fill =baselineP3$sexe)) + geom_boxplot() + ggtitle("Distribution de la santé perçue chez les sujets vivant seul, en couple \n ou en famille en fonction du sexe")
+```
+```{r}
+round(prop.table(table(baselineP3$srhBin, baselineP3$entourage),1)*100,2)
+```
+```{r}
+round(prop.table(table(baselineP3$activpro, baselineP3$entourage),1)*100,2)
+```
+
+```{r}
+ggplot(baselineP3, aes(x = baselineP3$entourage, y = baselineP3$srhNum, fill = baselineP3$activpro)) + geom_boxplot()+ ggtitle("Distribution de la santé perçue chez les sujets vivant seul, en couple \n ou en famille en fonction de l'activité pro")
+```
+```{r}
+round(prop.table(table(baselineP3$entourage, baselineP3$sexe), 1)*100,2)
+```
+
+```{r}
+reg_log_entourage = glm(baselineP3$srhBin ~ baselineP3$entourage, data = baselineP3, family = "binomial")
+summary(reg_log_entourage)
+odds.ratio(reg_log_entourage)
+```
+
+
+```{r}
+reg_lin_entourage = glm(baselineP3$srhNum ~ baselineP3$entourage, data = baselineP3, family = "gaussian")
+summary(reg_log_entourage)
+confint(reg_log_entourage)
+```
+```{r}
+model4_log = glm(baselineP3$srhBin ~ baselineP3$activpro + baselineP3$sexe + baselineP3$age0Cut + baselineP3$entourage, data = baselineP3, family = "binomial")
+summary(model4_log)
+odds.ratio(model4_log)
+```
+
+```{r}
+model4_lin = glm(baselineP3$srhNum ~ baselineP3$activpro + baselineP3$sexe + baselineP3$age0Cut + baselineP3$entourage, data = baselineP3, family = "gaussian")
+summary(model4_log)
+confint(model4_log)
+```
+
+

@@ -1,0 +1,56 @@
+---
+title: "Variable penibilte"
+output: html_notebook
+---
+
+```{r}
+summary(baseline$penib_lieuBin)
+```
+
+```{r}
+summary(baseline$penib_hor)
+```
+
+```{r}
+summary(baseline$penib_nuisance)
+```
+
+```{r}
+summary(baseline$penib_nuisance_12)
+```
+
+
+
+
+```{r}
+for (i in c("Qm6a","Qm6","Qm7","Qm8")){
+  plot(baseline[,i], main = colnames(baseline)[i],
+       ylab = "Count", col="steelblue", las = 2)
+  }
+```
+```{r}
+for (i in c("penib_lieuBin","penib_hor","penib_nuisance","penib_nuisance_12")){
+  plot(baseline[,i], main = colnames(baseline)[i],
+       ylab = "Count", col="steelblue", las = 2)
+  }
+```
+Analyse des correspondances multiples sur les variables Qm6 Qm6a Qm7 Qm8
+```{r}
+library(FactoMineR)
+library(factoextra)
+```
+
+```{r}
+penib = baseline[,c("Qm6a","Qm6","Qm7","Qm8")]
+penib2 = baseline[,c("penib_lieuBin","penib_hor","penib_nuisance","penib_nuisance_12")]
+```
+
+```{r}
+res.mca <- MCA (penib2, graph = TRUE)
+res.mca
+```
+
+
+
+
+

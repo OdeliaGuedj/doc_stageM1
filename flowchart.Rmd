@@ -1,0 +1,45 @@
+---
+title: "Flochart"
+output: html_notebook
+---
+
+```{r}
+
+DiagrammeR::grViz("
+digraph graph2 {
+
+graph [layout = dot]
+
+# node definitions with substituted label text
+node [shape = rectangle, width = 4, fillcolor = blue]
+a [label = '@@1']
+b [label = '@@2']
+c [label = '@@3']
+d [label = '@@4']
+e [label = '@@5']
+f [label = '@@6']
+g [label = '@@7']
+
+a -> b -> c -> d -> e -> f -> g
+
+
+}
+
+      [1]: 'n = 10157 participants à epp3'
+      [2]: '76 individus exclus car données manquantes sur variable activpro : n = 10081'
+      [3]: '26 individus exclus car données manquantes pour la srh dont 16 déjà exclus : n = 10071'
+      [4]: '27 individus exclus en tant que outliers sur âge : n = 10044'
+      [5]: '46 individus exclus car données manquantes sur variable entourage dont 20 déjà exclus : n = 10018'
+      [6]: '20 individus exclus car données manquantes sur variable tabac dont 16 déjà exclus : n = 10014'
+      [7]: '134 individus exclus car données manquantes sur variable cvd dont 17 déjà exclus : n = 9897'
+      [7]: '119 individus exclus car données manquantes sur variable cancer dont 66 déjà exclus : n = 9831'
+
+")
+
+```
+
+
+
+
+
+
